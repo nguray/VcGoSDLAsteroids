@@ -1,0 +1,4 @@
+*.exe
+*.dll
+sdl2_asteroids
+HighScores.txt
