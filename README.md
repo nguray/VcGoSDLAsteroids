@@ -1,1 +1,1 @@
-# Asteroids in Go using SDL2
+## Asteroids in Go using SDL2
