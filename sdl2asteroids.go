@@ -191,11 +191,17 @@ func main() {
 	a := 40.0
 	ship = ShipNew(400, 400, a, 1.5)
 
-	shipTex, err := renderer.CreateTextureFromSurface(shipImg0)
-	if err != nil {
-		return
-	}
-	defer shipTex.Destroy()
+	shipTex0, _ := renderer.CreateTextureFromSurface(shipImg0)
+	defer shipTex0.Destroy()
+	shipTex1, _ := renderer.CreateTextureFromSurface(shipImg1)
+	defer shipTex1.Destroy()
+	shipTex2, _ := renderer.CreateTextureFromSurface(shipImg2)
+	defer shipTex2.Destroy()
+
+	ship.idleTex = shipTex0
+	ship.accelTex = shipTex1
+	ship.decelTex = shipTex2
+	ship.curTex = shipTex0
 
 	//var rect sdl.Rect
 	//var rects []sdl.Rect
@@ -273,20 +279,9 @@ func main() {
 		//------------------------------------------------------------
 		//-- Draw Game
 
-		src = sdl.Rect{X: 0, Y: 0, W: 32, H: 32}
-		dst = sdl.Rect{X: int32(ship.x), Y: int32(ship.y), W: 32, H: 32}
-
 		//renderer.Copy(shipTex, &src, &dst)
-		//renderer.CopyEx(shipTex, &src, &dst, 45.0, &sdl.Point{16, 16}, sdl.FLIP_NONE)
-		renderer.CopyEx(shipTex, &src, &dst, ship.a, nil, sdl.FLIP_NONE)
 
-		left := dst.X
-		top := dst.Y
-		right := left + dst.W
-		bottom := top + dst.H
-		renderer.SetDrawColor(255, 0, 0, 255)
-		renderer.DrawLine(left, top, right, top)
-		renderer.DrawLine(right, top, right, bottom)
+		ship.Draw(renderer)
 
 		// if surface, err = window.GetSurface(); err == nil {
 		// 	shipSprite.BlitScaled(nil, surface, &sdl.Rect{X: 100, Y: 100, W: 32, H: 32})
