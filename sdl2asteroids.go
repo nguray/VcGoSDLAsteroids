@@ -189,7 +189,7 @@ func main() {
 	defer renderer.Destroy()
 
 	a := -90.0
-	ship = ShipNew(Vector2f{400.0, 500.0}, a, 0.0)
+	ship = ShipNew(Vector2f{400.0, 500.0}, a)
 
 	shipTex0, _ := renderer.CreateTextureFromSurface(shipImg0)
 	defer shipTex0.Destroy()
@@ -281,11 +281,29 @@ func main() {
 
 		if iAccel > 0 {
 			ship.Accelerate(0.1)
+			ship.SetForwardThrush()
 		} else if iAccel < 0 {
 			ship.Accelerate(-0.1)
+			ship.SetBackwardTrush()
+		} else {
+			ship.SetIdle()
 		}
 
 		ship.UpdatePosition()
+
+		// Keep Ship inside screen
+		p := ship.pos
+		if p.x < 0.0 {
+			p.x = WIN_WIDTH
+		} else if p.x > WIN_WIDTH {
+			p.x = 0.0
+		}
+		if p.y < 0.0 {
+			p.y = WIN_HEIGHT
+		} else if p.y > WIN_HEIGHT {
+			p.y = 0.0
+		}
+		ship.pos = p
 
 		//fmt.Printf("iRotate = %d\n", int32(ship.a))
 
