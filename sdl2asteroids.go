@@ -38,97 +38,12 @@ const (
 )
 
 var (
-	//cellSize int32
 	//tt_font  *ttf.Font
-	surface  *sdl.Surface
-	src, dst sdl.Rect
+	//surface *sdl.Surface
+	//src, dst sdl.Rect
 
 	ship *Ship
 )
-
-// func ProcessEventsPlay(renderer *sdl.Renderer) bool {
-// 	for event := sdl.PollEvent(); event != nil; event = sdl.PollEvent() {
-// 		switch t := event.(type) {
-// 		case *sdl.QuitEvent:
-// 			game.fQuitGame = true
-// 			return false
-// 		case *sdl.KeyboardEvent:
-
-// 			keyCode := t.Keysym.Sym
-
-// 			//keys := ""
-// 			if t.State == sdl.PRESSED && t.Repeat == 0 {
-// 				switch keyCode {
-// 				case sdl.K_p:
-// 					game.fPause = !game.fPause
-// 				case sdl.K_LEFT:
-// 					game.velX = -1
-// 					isOutLRBoardLimit = curTetromino.IsOutLeftBoardLimit
-// 				case sdl.K_RIGHT:
-// 					game.velX = 1
-// 					isOutLRBoardLimit = curTetromino.IsOutRightBoardLimit
-// 				case sdl.K_UP:
-// 					if curTetromino != nil {
-// 						curTetromino.RotateLeft()
-
-// 						if curTetromino.HitGround(game.board) {
-// 							//-- Undo Rotate
-// 							curTetromino.RotateRight()
-
-// 						} else if curTetromino.IsOutRightBoardLimit() {
-// 							backupX := curTetromino.x
-// 							//-- Move tetromino inside board
-// 							for curTetromino.IsOutRightBoardLimit() {
-// 								curTetromino.x--
-// 							}
-// 							if curTetromino.HitGround(game.board) {
-// 								curTetromino.x = backupX
-// 								//-- Undo Rotate
-// 								curTetromino.RotateRight()
-// 							}
-
-// 						} else if curTetromino.IsOutLeftBoardLimit() {
-
-// 							backupX := curTetromino.x
-// 							//-- Move tetromino inside board
-// 							for curTetromino.IsOutLeftBoardLimit() {
-// 								curTetromino.x++
-// 							}
-// 							if curTetromino.HitGround(game.board) {
-// 								curTetromino.x = backupX
-// 								//-- Undo Rotate
-// 								curTetromino.RotateRight()
-// 							}
-
-// 						}
-
-// 					}
-// 				case sdl.K_DOWN:
-// 					game.fFastDown = true
-// 				case sdl.K_SPACE:
-// 					if curTetromino != nil {
-// 						//-- Drop current Tetromino
-// 						game.fDrop = true
-// 					}
-// 				case sdl.K_ESCAPE:
-// 					return false
-// 				}
-// 			} else if t.State == sdl.RELEASED {
-// 				switch keyCode {
-// 				case sdl.K_LEFT:
-// 					game.velX = 0
-// 				case sdl.K_RIGHT:
-// 					game.velX = 0
-// 				case sdl.K_DOWN:
-// 					game.fFastDown = false
-// 				}
-
-// 			}
-
-// 		}
-// 	}
-// 	return true
-// }
 
 func main() {
 
