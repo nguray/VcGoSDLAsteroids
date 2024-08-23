@@ -188,8 +188,8 @@ func main() {
 	}
 	defer renderer.Destroy()
 
-	a := 40.0
-	ship = ShipNew(400, 400, a, 1.5)
+	a := -90.0
+	ship = ShipNew(Vector2f{400.0, 500.0}, a, 0.0)
 
 	shipTex0, _ := renderer.CreateTextureFromSurface(shipImg0)
 	defer shipTex0.Destroy()
@@ -212,6 +212,7 @@ func main() {
 	//startR := startH
 
 	iRotate := 0
+	iAccel := 0
 
 	running := true
 	for running {
@@ -237,10 +238,12 @@ func main() {
 					switch keyCode {
 					case sdl.K_LEFT:
 						iRotate = -1
-
 					case sdl.K_RIGHT:
 						iRotate = 1
-
+					case sdl.K_UP:
+						iAccel = 1
+					case sdl.K_DOWN:
+						iAccel = -1
 					case sdl.K_ESCAPE:
 						return
 					}
@@ -250,9 +253,10 @@ func main() {
 						iRotate = 0
 					case sdl.K_RIGHT:
 						iRotate = 0
-
+					case sdl.K_UP:
+						iAccel = 0
 					case sdl.K_DOWN:
-
+						iAccel = 0
 					}
 
 				}
@@ -270,11 +274,20 @@ func main() {
 		// renderer.FillRects(rects)
 
 		if iRotate < 0 {
-			ship.OffsetAngle(-2.0)
-		} else if iRotate > 0 {
 			ship.OffsetAngle(2.0)
+		} else if iRotate > 0 {
+			ship.OffsetAngle(-2.0)
 		}
-		//fmt.Printf("iRotate = %d\n", int32(ship.angle))
+
+		if iAccel > 0 {
+			ship.Accelerate(0.1)
+		} else if iAccel < 0 {
+			ship.Accelerate(-0.1)
+		}
+
+		ship.UpdatePosition()
+
+		//fmt.Printf("iRotate = %d\n", int32(ship.a))
 
 		//------------------------------------------------------------
 		//-- Draw Game
@@ -291,7 +304,7 @@ func main() {
 		//--
 		renderer.Present()
 
-		sdl.Delay(30)
+		sdl.Delay(20)
 
 	}
 
