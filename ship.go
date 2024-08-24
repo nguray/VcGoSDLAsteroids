@@ -87,3 +87,8 @@ func (sh *Ship) Accelerate(d float64) {
 	sh.veloVec.AddVector(v)
 
 }
+
+func (sh *Ship) DirectionVec() Vector2f {
+	ra := ((sh.a) * math.Pi) / 180.0
+	return Vector2f{math.Cos(ra), math.Sin(ra)}
+}

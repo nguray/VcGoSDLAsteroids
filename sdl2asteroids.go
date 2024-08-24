@@ -43,6 +43,8 @@ var (
 	//src, dst sdl.Rect
 
 	ship *Ship
+
+	bullets []*Bullet
 )
 
 func main() {
@@ -159,6 +161,10 @@ func main() {
 						iAccel = 1
 					case sdl.K_DOWN:
 						iAccel = -1
+					case sdl.K_SPACE:
+						v := ship.DirectionVec()
+						v.MulScalar(5.0)
+						bullets = append(bullets, NewBullet(ship.pos, v))
 					case sdl.K_ESCAPE:
 						return
 					}
@@ -220,6 +226,15 @@ func main() {
 		}
 		ship.pos = p
 
+		//-- Bullets
+		for _, b := range bullets {
+			b.UpdatePosition()
+			//-- Check for out range
+			if (b.pos.x < 0) || (b.pos.x > WIN_WIDTH) || (b.pos.y < 0) || (b.pos.y > WIN_HEIGHT) {
+				b.SetDelete(true)
+			}
+		}
+
 		//fmt.Printf("iRotate = %d\n", int32(ship.a))
 
 		//------------------------------------------------------------
@@ -229,6 +244,12 @@ func main() {
 
 		ship.Draw(renderer)
 
+		for _, b := range bullets {
+			if !b.fDelete {
+				b.Draw(renderer)
+			}
+		}
+
 		// if surface, err = window.GetSurface(); err == nil {
 		// 	shipSprite.BlitScaled(nil, surface, &sdl.Rect{X: 100, Y: 100, W: 32, H: 32})
 		// 	window.UpdateSurface()
@@ -236,6 +257,17 @@ func main() {
 
 		//--
 		renderer.Present()
+
+		//-- Update Bullets Slices
+		tmp := bullets[:0]
+		for _, b := range bullets {
+			if !b.fDelete {
+				tmp = append(tmp, b)
+			}
+		}
+		bullets = tmp
+
+		//fmt.Printf("nb bullets = %d\n", len(bullets))
 
 		sdl.Delay(20)
 
