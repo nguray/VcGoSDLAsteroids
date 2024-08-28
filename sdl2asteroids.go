@@ -120,6 +120,14 @@ func main() {
 	ship.decelTex = shipTex2
 	ship.curTex = shipTex0
 
+	a = -50.0
+	ra := a * math.Pi / 180.0
+	rock1 := NewRock(Vector2f{100, 300}, Vector2f{3.0 * math.Cos(ra), 3.0 * math.Sin(ra)}, 1)
+
+	a = -120.0
+	ra = a * math.Pi / 180.0
+	rock2 := NewRock(Vector2f{500, 300}, Vector2f{3.5 * math.Cos(ra), 3.5 * math.Sin(ra)}, 2)
+
 	//var rect sdl.Rect
 	//var rects []sdl.Rect
 
@@ -127,6 +135,8 @@ func main() {
 	//startH := time.Now()
 	//startV := startH
 	//startR := startH
+
+	screenFrame := sdl.Rect{0, 0, WIN_WIDTH, WIN_HEIGHT}
 
 	iRotate := 0
 	iAccel := 0
@@ -235,6 +245,15 @@ func main() {
 			}
 		}
 
+		//--
+		rock1.UpdatePosition()
+		rock1.CollideSreenFrame(screenFrame)
+
+		rock2.UpdatePosition()
+		rock2.CollideSreenFrame(screenFrame)
+
+		rock1.CollideRock(rock2)
+
 		//fmt.Printf("iRotate = %d\n", int32(ship.a))
 
 		//------------------------------------------------------------
@@ -249,6 +268,9 @@ func main() {
 				b.Draw(renderer)
 			}
 		}
+
+		rock1.Draw(renderer)
+		rock2.Draw(renderer)
 
 		// if surface, err = window.GetSurface(); err == nil {
 		// 	shipSprite.BlitScaled(nil, surface, &sdl.Rect{X: 100, Y: 100, W: 32, H: 32})
