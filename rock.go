@@ -1,7 +1,7 @@
 package main
 
 import (
-	"fmt"
+	"math"
 
 	"github.com/veandco/go-sdl2/sdl"
 )
@@ -16,6 +16,34 @@ type Rock struct {
 func NewRock(p Vector2f, v Vector2f, m float64) *Rock {
 	rck := &Rock{pos: p, veloVec: v, mass: m}
 	rck.radius = 10.0 * m
+	return rck
+}
+
+func NewRandomRock() *Rock {
+
+	m := float64(1 + myRand.Intn(2))
+	px := myRand.Intn(WIN_WIDTH)
+	ri := int(10 * m)
+	if px < ri {
+		px = ri + 1
+	} else if px > (WIN_WIDTH - ri) {
+		px = WIN_WIDTH - ri - 1
+	}
+	py := myRand.Intn(WIN_HEIGHT)
+	if py < ri {
+		py = ri + 1
+	} else if py > (WIN_HEIGHT - ri) {
+		py = WIN_HEIGHT - ri - 1
+	}
+
+	ra := float64(myRand.Intn(360)) * math.Pi / 180.0
+	rck := &Rock{
+		pos:     Vector2f{float64(px), float64(py)},
+		veloVec: Vector2f{1.5 * math.Cos(ra), 1.5 * math.Sin(ra)},
+		mass:    m,
+		radius:  10.0 * m,
+	}
+
 	return rck
 }
 
@@ -85,7 +113,7 @@ func (r *Rock) CollideRock(r1 *Rock) {
 	v.SubVector(r.pos)
 	d := v.Magnitude()
 	if d <= (r.radius + r1.radius) {
-		fmt.Print("Collision\n")
+		//mt.Print("Collision\n")
 
 		nV12 := v
 		tV12 := nV12.NormalVector()

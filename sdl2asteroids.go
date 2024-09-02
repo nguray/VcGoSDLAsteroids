@@ -8,9 +8,10 @@ package main
 
 import (
 	"fmt"
-	"math"
+	"math/rand"
 	"os"
 	"path/filepath"
+	"time"
 
 	"github.com/veandco/go-sdl2/img"
 	"github.com/veandco/go-sdl2/sdl"
@@ -45,6 +46,8 @@ var (
 	ship *Ship
 
 	bullets []*Bullet
+	rocks   []*Rock
+	myRand  *rand.Rand
 )
 
 func main() {
@@ -89,12 +92,12 @@ func main() {
 	}
 	defer shipImg2.Free()
 
-	v1 := Vector2f{1.5 * math.Cos(20.0), 1.5 * math.Sin(20.0)}
-	fmt.Printf("v1(%3.2f,%3.2f)\n", v1.x, v1.y)
-	uv1 := v1.UnitVector()
-	fmt.Printf("uv1(%3.2f,%3.2f)\n", uv1.x, uv1.y)
-	nv1 := uv1.NormalVector()
-	fmt.Printf("nv1(%3.2f,%3.2f)\n", nv1.x, nv1.y)
+	// v1 := Vector2f{1.5 * math.Cos(20.0), 1.5 * math.Sin(20.0)}
+	// fmt.Printf("v1(%3.2f,%3.2f)\n", v1.x, v1.y)
+	// uv1 := v1.UnitVector()
+	// fmt.Printf("uv1(%3.2f,%3.2f)\n", uv1.x, uv1.y)
+	// nv1 := uv1.NormalVector()
+	// fmt.Printf("nv1(%3.2f,%3.2f)\n", nv1.x, nv1.y)
 
 	renderer, err = sdl.CreateRenderer(window, -1, sdl.RENDERER_ACCELERATED|sdl.RENDERER_PRESENTVSYNC)
 	//renderer, err = sdl.CreateRenderer(window, -1, sdl.RENDERER_ACCELERATED)
@@ -120,13 +123,12 @@ func main() {
 	ship.decelTex = shipTex2
 	ship.curTex = shipTex0
 
-	a = -50.0
-	ra := a * math.Pi / 180.0
-	rock1 := NewRock(Vector2f{100, 300}, Vector2f{3.0 * math.Cos(ra), 3.0 * math.Sin(ra)}, 1)
+	myRand = rand.New(rand.NewSource(time.Now().UnixNano()))
 
-	a = -120.0
-	ra = a * math.Pi / 180.0
-	rock2 := NewRock(Vector2f{500, 300}, Vector2f{3.5 * math.Cos(ra), 3.5 * math.Sin(ra)}, 2)
+	for i := 0; i < 10; i++ {
+		rocks = append(rocks, NewRandomRock())
+
+	}
 
 	//var rect sdl.Rect
 	//var rects []sdl.Rect
@@ -136,7 +138,7 @@ func main() {
 	//startV := startH
 	//startR := startH
 
-	screenFrame := sdl.Rect{0, 0, WIN_WIDTH, WIN_HEIGHT}
+	screenFrame := sdl.Rect{X: 0, Y: 0, W: WIN_WIDTH, H: WIN_HEIGHT}
 
 	iRotate := 0
 	iAccel := 0
@@ -202,7 +204,7 @@ func main() {
 
 		// rects = []sdl.Rect{{500, 300, 100, 100}, {200, 300, 200, 200}}
 		// renderer.SetDrawColor(255, 0, 255, 255)
-		// renderer.FillRects(rects)
+		// renderer.FillReocks[i]cts(rects)
 
 		if iRotate < 0 {
 			ship.OffsetAngle(2.0)
@@ -245,14 +247,20 @@ func main() {
 			}
 		}
 
-		//--
-		rock1.UpdatePosition()
-		rock1.CollideSreenFrame(screenFrame)
+		//-- Rocks
+		for _, rock := range rocks {
+			rock.UpdatePosition()
+			rock.CollideSreenFrame(screenFrame)
 
-		rock2.UpdatePosition()
-		rock2.CollideSreenFrame(screenFrame)
+		}
 
-		rock1.CollideRock(rock2)
+		var r *Rock
+		for i := 0; i < len(rocks); i++ {
+			r = rocks[i]
+			for j := i + 1; j < len(rocks); j++ {
+				r.CollideRock(rocks[j])
+			}
+		}
 
 		//fmt.Printf("iRotate = %d\n", int32(ship.a))
 
@@ -269,8 +277,9 @@ func main() {
 			}
 		}
 
-		rock1.Draw(renderer)
-		rock2.Draw(renderer)
+		for _, rock := range rocks {
+			rock.Draw(renderer)
+		}
 
 		// if surface, err = window.GetSurface(); err == nil {
 		// 	shipSprite.BlitScaled(nil, surface, &sdl.Rect{X: 100, Y: 100, W: 32, H: 32})
