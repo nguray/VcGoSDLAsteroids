@@ -46,13 +46,37 @@ var (
 
 	ship *Ship
 
-	bullets     []*Bullet
-	rocks       []*Rock
-	myRand      *rand.Rand
-	fPause      bool
-	laser_sound *mix.Chunk
-	joysticks   [16]*sdl.Joystick
+	bullets       []*Bullet
+	rocks         []*Rock
+	myRand        *rand.Rand
+	fPause        bool
+	laser_snd     *mix.Chunk
+	explosion_snd *mix.Chunk
+	joysticks     [16]*sdl.Joystick
 )
+
+func NewGame() {
+
+	//--
+	for i := 0; i < 5; i++ {
+		rocks = append(rocks, NewRandomRock())
+	}
+	ship.SetPosition(Vector2f{WIN_WIDTH / 2, WIN_HEIGHT / 2})
+	bullets = bullets[:0]
+}
+
+func FireBullet() {
+
+	if fPause {
+		fPause = false
+	} else {
+		v := ship.DirectionVec()
+		v.MulScalar(5.0)
+		bullets = append(bullets, NewBullet(ship.pos, v))
+		laser_snd.Play(-1, 0)
+	}
+
+}
 
 func main() {
 
@@ -64,7 +88,7 @@ func main() {
 	defer sdl.Quit()
 
 	nbJoysticks := sdl.NumJoysticks()
-	fmt.Printf("nb joysticks = %d\n", nbJoysticks)
+	//fmt.Printf("nb joysticks = %d\n", nbJoysticks)
 
 	if nbJoysticks != 0 {
 		sdl.JoystickEventState(sdl.ENABLE)
@@ -112,24 +136,31 @@ func main() {
 
 	mix.OpenAudio(44100, mix.DEFAULT_FORMAT, mix.DEFAULT_CHANNELS, 1024)
 	fullPathName = filepath.Join(curDir, "resources", "344276__nsstudios__laser3.wav")
-	laser_sound, err = mix.LoadWAV(fullPathName)
+	laser_snd, err = mix.LoadWAV(fullPathName)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Load Sound: %s\n", err)
 		panic(err)
 	}
-	defer laser_sound.Free()
+	defer laser_snd.Free()
+
+	fullPathName = filepath.Join(curDir, "resources", "asteroid-94614.mp3")
+	explosion_snd, err = mix.LoadWAV(fullPathName)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Load Sound: %s\n", err)
+		panic(err)
+	}
+	defer explosion_snd.Free()
 
 	renderer, err = sdl.CreateRenderer(window, -1, sdl.RENDERER_ACCELERATED|sdl.RENDERER_PRESENTVSYNC)
 	//renderer, err = sdl.CreateRenderer(window, -1, sdl.RENDERER_ACCELERATED)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Failed to create renderer: %s\n", err)
-		//return 2
 		panic(err)
 	}
 	defer renderer.Destroy()
 
 	a := -90.0
-	ship = ShipNew(Vector2f{400.0, 500.0}, a)
+	ship = ShipNew(Vector2f{WIN_WIDTH / 2, WIN_HEIGHT / 2}, a)
 
 	shipTex0, _ := renderer.CreateTextureFromSurface(shipImg0)
 	defer shipTex0.Destroy()
@@ -145,13 +176,7 @@ func main() {
 
 	myRand = rand.New(rand.NewSource(time.Now().UnixNano()))
 
-	for i := 0; i < 10; i++ {
-		rocks = append(rocks, NewRandomRock())
-
-	}
-
-	//var rect sdl.Rect
-	//var rects []sdl.Rect
+	NewGame()
 
 	//--
 	//startH := time.Now()
@@ -163,8 +188,9 @@ func main() {
 	iRotate := 0
 	iAccel := 0
 
-	fPause = false
+	fPause = true
 	running := true
+
 	for running {
 
 		//-- Draw Background
@@ -182,16 +208,42 @@ func main() {
 			case *sdl.QuitEvent:
 				return
 			case *sdl.JoyAxisEvent:
+
 				fmt.Printf("[%d ms] JoyAxis\ttype:%d\twhich:%c\taxis:%d\tvalue:%d\n",
 					t.Timestamp, t.Type, t.Which, t.Axis, t.Value)
+
+				switch t.Axis {
+				case 1:
+					if t.Value < 500 && t.Value > -500 {
+						iAccel = 0
+					} else if t.Value < 500 {
+						iAccel = 1
+					} else if t.Value > 500 {
+						iAccel = -1
+					}
+				case 3:
+					if t.Value < 500 && t.Value > -500 {
+						iRotate = 0
+					} else if t.Value < 500 {
+						iRotate = -1
+					} else if t.Value > 500 {
+						iRotate = 1
+					}
+
+				}
+
 			case *sdl.JoyBallEvent:
 				fmt.Println("Joystick", t.Which, "trackball moved by", t.XRel, t.YRel)
 			case *sdl.JoyButtonEvent:
 				if t.State == sdl.PRESSED {
 					fmt.Println("Joystick", t.Which, "button", t.Button, "pressed")
+					if t.Button == 4 || t.Button == 5 {
+						FireBullet()
+					}
 				} else {
 					fmt.Println("Joystick", t.Which, "button", t.Button, "released")
 				}
+
 			case *sdl.JoyHatEvent:
 				position := ""
 				switch t.Value {
@@ -244,10 +296,7 @@ func main() {
 					case sdl.K_p:
 						fPause = !fPause
 					case sdl.K_SPACE:
-						v := ship.DirectionVec()
-						v.MulScalar(5.0)
-						bullets = append(bullets, NewBullet(ship.pos, v))
-						laser_sound.Play(-1, 0)
+						FireBullet()
 					case sdl.K_ESCAPE:
 						return
 					}
@@ -269,21 +318,19 @@ func main() {
 
 		}
 
-		//running = processEvents(renderer)
-
 		//-- Game Mode Update States
 
 		// rects = []sdl.Rect{{500, 300, 100, 100}, {200, 300, 200, 200}}
 		// renderer.SetDrawColor(255, 0, 255, 255)
-		// renderer.FillReocks[i]cts(rects)
+		// renderer.FillRects(rects)
+
+		if iRotate < 0 {
+			ship.OffsetAngle(2.0)
+		} else if iRotate > 0 {
+			ship.OffsetAngle(-2.0)
+		}
 
 		if !fPause {
-
-			if iRotate < 0 {
-				ship.OffsetAngle(3.0)
-			} else if iRotate > 0 {
-				ship.OffsetAngle(-3.0)
-			}
 
 			if iAccel > 0 {
 				ship.Accelerate(0.1)
@@ -313,15 +360,17 @@ func main() {
 
 			//-- Bullets
 			for _, b := range bullets {
+
 				b.UpdatePosition()
 
 				//--
 				for _, rock := range rocks {
 					if b.CollideRock(rock) {
 						rock.fDelete = true
+						explosion_snd.Play(-1, 0)
 						if rock.mass > 1 {
 							//-- SubDivide
-							m := rock.mass / 2
+							m := rock.mass / 3
 							v := rock.veloVec
 							n := v.NormalVector()
 							un := n.UnitVector()
@@ -350,6 +399,12 @@ func main() {
 							uv20.MulScalar(21)
 							p2.AddVector(uv20)
 							rocks = append(rocks, NewRock(p2, v2, m))
+
+							p3 := rock.pos
+							v30 := v
+							v30.MulScalar(-1)
+							rocks = append(rocks, NewRock(p3, v30, m))
+
 							//fPause = true
 						}
 						b.fDelete = true
@@ -361,6 +416,7 @@ func main() {
 				if (b.pos.x < 0) || (b.pos.x > WIN_WIDTH) || (b.pos.y < 0) || (b.pos.y > WIN_HEIGHT) {
 					b.SetDelete(true)
 				}
+
 			}
 
 			//-- Update Rocks Slices
@@ -388,8 +444,6 @@ func main() {
 			}
 
 		}
-
-		//fmt.Printf("iRotate = %d\n", int32(ship.a))
 
 		//------------------------------------------------------------
 		//-- Draw Game
@@ -428,6 +482,14 @@ func main() {
 			}
 		}
 		bullets = tmp
+
+		if len(rocks) == 0 {
+			NewGame()
+			fPause = true
+			for sdl.PollEvent() != nil {
+			}
+			sdl.Delay(500)
+		}
 
 		//fmt.Printf("nb bullets = %d\n", len(bullets))
 

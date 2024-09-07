@@ -22,6 +22,7 @@ func ShipNew(p Vector2f, a float64) *Ship {
 	ra := ((a) * math.Pi) / 180.0
 	unitVec := Vector2f{math.Cos(ra), math.Sin(ra)}
 	v := unitVec
+	v.MulScalar(0.1)
 	return &Ship{pos: p, a: a, veloVec: v, thrushUnitVec: unitVec}
 }
 
@@ -91,4 +92,8 @@ func (sh *Ship) Accelerate(d float64) {
 func (sh *Ship) DirectionVec() Vector2f {
 	ra := ((sh.a) * math.Pi) / 180.0
 	return Vector2f{math.Cos(ra), math.Sin(ra)}
+}
+
+func (sh *Ship) SetPosition(p Vector2f) {
+	sh.pos = p
 }
