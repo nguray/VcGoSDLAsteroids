@@ -11,11 +11,13 @@ type Rock struct {
 	veloVec Vector2f
 	mass    float64
 	radius  float64
+	fDelete bool
 }
 
 func NewRock(p Vector2f, v Vector2f, m float64) *Rock {
 	rck := &Rock{pos: p, veloVec: v, mass: m}
 	rck.radius = 10.0 * m
+	rck.fDelete = false
 	return rck
 }
 
@@ -42,6 +44,7 @@ func NewRandomRock() *Rock {
 		veloVec: Vector2f{1.5 * math.Cos(ra), 1.5 * math.Sin(ra)},
 		mass:    m,
 		radius:  10.0 * m,
+		fDelete: false,
 	}
 
 	return rck
@@ -87,6 +90,14 @@ func (r *Rock) Draw(renderer *sdl.Renderer) {
 
 	renderer.SetDrawColor(255, 255, 0, 255)
 	DrawCircle(renderer, int32(r.pos.x), int32(r.pos.y), int32(r.radius))
+
+	x1 := r.pos.x
+	y1 := r.pos.y
+	v := r.veloVec
+	v.MulScalar(10)
+	x2 := x1 + v.x
+	y2 := y1 + v.y
+	renderer.DrawLine(int32(x1), int32(y1), int32(x2), int32(y2))
 
 }
 

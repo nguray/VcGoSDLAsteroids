@@ -20,6 +20,14 @@ func (bul *Bullet) UpdatePosition() {
 	bul.pos.AddVector(bul.veloVect)
 }
 
+func (bul *Bullet) CollideRock(rock *Rock) bool {
+
+	v := bul.pos
+	v.SubVector(rock.pos)
+	d := v.Magnitude()
+	return d < rock.radius
+}
+
 func (bul *Bullet) Draw(renderer *sdl.Renderer) {
 	uv := bul.veloVect.UnitVector()
 	uv.MulScalar(5.0)

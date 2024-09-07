@@ -14,6 +14,7 @@ import (
 	"time"
 
 	"github.com/veandco/go-sdl2/img"
+	"github.com/veandco/go-sdl2/mix"
 	"github.com/veandco/go-sdl2/sdl"
 	"github.com/veandco/go-sdl2/ttf"
 )
@@ -45,9 +46,12 @@ var (
 
 	ship *Ship
 
-	bullets []*Bullet
-	rocks   []*Rock
-	myRand  *rand.Rand
+	bullets     []*Bullet
+	rocks       []*Rock
+	myRand      *rand.Rand
+	fPause      bool
+	laser_sound *mix.Chunk
+	joysticks   [16]*sdl.Joystick
 )
 
 func main() {
@@ -58,6 +62,13 @@ func main() {
 		panic(err)
 	}
 	defer sdl.Quit()
+
+	nbJoysticks := sdl.NumJoysticks()
+	fmt.Printf("nb joysticks = %d\n", nbJoysticks)
+
+	if nbJoysticks != 0 {
+		sdl.JoystickEventState(sdl.ENABLE)
+	}
 
 	window, err := sdl.CreateWindow(TITLE, sdl.WINDOWPOS_UNDEFINED, sdl.WINDOWPOS_UNDEFINED,
 		WIN_WIDTH, WIN_HEIGHT, sdl.WINDOW_SHOWN)
@@ -98,6 +109,15 @@ func main() {
 	// fmt.Printf("uv1(%3.2f,%3.2f)\n", uv1.x, uv1.y)
 	// nv1 := uv1.NormalVector()
 	// fmt.Printf("nv1(%3.2f,%3.2f)\n", nv1.x, nv1.y)
+
+	mix.OpenAudio(44100, mix.DEFAULT_FORMAT, mix.DEFAULT_CHANNELS, 1024)
+	fullPathName = filepath.Join(curDir, "resources", "344276__nsstudios__laser3.wav")
+	laser_sound, err = mix.LoadWAV(fullPathName)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Load Sound: %s\n", err)
+		panic(err)
+	}
+	defer laser_sound.Free()
 
 	renderer, err = sdl.CreateRenderer(window, -1, sdl.RENDERER_ACCELERATED|sdl.RENDERER_PRESENTVSYNC)
 	//renderer, err = sdl.CreateRenderer(window, -1, sdl.RENDERER_ACCELERATED)
@@ -143,6 +163,7 @@ func main() {
 	iRotate := 0
 	iAccel := 0
 
+	fPause = false
 	running := true
 	for running {
 
@@ -152,7 +173,7 @@ func main() {
 
 		// rect = sdl.Rect{X: int32(LEFT), Y: int32(TOP), W: int32(cellSize * NB_COLUMNS), H: int32(cellSize * NB_ROWS)}
 		// renderer.SetDrawColor(10, 10, 100, 255)
-		// renderer.FillRect(&rect)
+		// renderer.FillRect(&rect)20
 
 		//-- Process current mode Events
 		for event := sdl.PollEvent(); event != nil; event = sdl.PollEvent() {
@@ -160,6 +181,53 @@ func main() {
 			switch t := event.(type) {
 			case *sdl.QuitEvent:
 				return
+			case *sdl.JoyAxisEvent:
+				fmt.Printf("[%d ms] JoyAxis\ttype:%d\twhich:%c\taxis:%d\tvalue:%d\n",
+					t.Timestamp, t.Type, t.Which, t.Axis, t.Value)
+			case *sdl.JoyBallEvent:
+				fmt.Println("Joystick", t.Which, "trackball moved by", t.XRel, t.YRel)
+			case *sdl.JoyButtonEvent:
+				if t.State == sdl.PRESSED {
+					fmt.Println("Joystick", t.Which, "button", t.Button, "pressed")
+				} else {
+					fmt.Println("Joystick", t.Which, "button", t.Button, "released")
+				}
+			case *sdl.JoyHatEvent:
+				position := ""
+				switch t.Value {
+				case sdl.HAT_LEFTUP:
+					position = "top-left"
+				case sdl.HAT_UP:
+					position = "top"
+				case sdl.HAT_RIGHTUP:
+					position = "top-right"
+				case sdl.HAT_RIGHT:
+					position = "right"
+				case sdl.HAT_RIGHTDOWN:
+					position = "bottom-right"
+				case sdl.HAT_DOWN:
+					position = "bottom"
+				case sdl.HAT_LEFTDOWN:
+					position = "bottom-left"
+				case sdl.HAT_LEFT:
+					position = "left"
+				case sdl.HAT_CENTERED:
+					position = "center"
+				}
+
+				fmt.Println("Joystick", t.Which, "hat", t.Hat, "moved to", position, "position")
+			case *sdl.JoyDeviceAddedEvent:
+				// Open joystick for use
+				joysticks[int(t.Which)] = sdl.JoystickOpen(int(t.Which))
+				if joysticks[int(t.Which)] != nil {
+					fmt.Println("Joystick", t.Which, "connected")
+				}
+			case *sdl.JoyDeviceRemovedEvent:
+				if joystick := joysticks[int(t.Which)]; joystick != nil {
+					joystick.Close()
+				}
+				fmt.Println("Joystick", t.Which, "disconnected")
+
 			case *sdl.KeyboardEvent:
 				keyCode := t.Keysym.Sym
 
@@ -173,10 +241,13 @@ func main() {
 						iAccel = 1
 					case sdl.K_DOWN:
 						iAccel = -1
+					case sdl.K_p:
+						fPause = !fPause
 					case sdl.K_SPACE:
 						v := ship.DirectionVec()
 						v.MulScalar(5.0)
 						bullets = append(bullets, NewBullet(ship.pos, v))
+						laser_sound.Play(-1, 0)
 					case sdl.K_ESCAPE:
 						return
 					}
@@ -206,60 +277,116 @@ func main() {
 		// renderer.SetDrawColor(255, 0, 255, 255)
 		// renderer.FillReocks[i]cts(rects)
 
-		if iRotate < 0 {
-			ship.OffsetAngle(2.0)
-		} else if iRotate > 0 {
-			ship.OffsetAngle(-2.0)
-		}
+		if !fPause {
 
-		if iAccel > 0 {
-			ship.Accelerate(0.1)
-			ship.SetForwardThrush()
-		} else if iAccel < 0 {
-			ship.Accelerate(-0.1)
-			ship.SetBackwardTrush()
-		} else {
-			ship.SetIdle()
-		}
-
-		ship.UpdatePosition()
-
-		// Keep Ship inside screen
-		p := ship.pos
-		if p.x < 0.0 {
-			p.x = WIN_WIDTH
-		} else if p.x > WIN_WIDTH {
-			p.x = 0.0
-		}
-		if p.y < 0.0 {
-			p.y = WIN_HEIGHT
-		} else if p.y > WIN_HEIGHT {
-			p.y = 0.0
-		}
-		ship.pos = p
-
-		//-- Bullets
-		for _, b := range bullets {
-			b.UpdatePosition()
-			//-- Check for out range
-			if (b.pos.x < 0) || (b.pos.x > WIN_WIDTH) || (b.pos.y < 0) || (b.pos.y > WIN_HEIGHT) {
-				b.SetDelete(true)
+			if iRotate < 0 {
+				ship.OffsetAngle(3.0)
+			} else if iRotate > 0 {
+				ship.OffsetAngle(-3.0)
 			}
-		}
 
-		//-- Rocks
-		for _, rock := range rocks {
-			rock.UpdatePosition()
-			rock.CollideSreenFrame(screenFrame)
-
-		}
-
-		var r *Rock
-		for i := 0; i < len(rocks); i++ {
-			r = rocks[i]
-			for j := i + 1; j < len(rocks); j++ {
-				r.CollideRock(rocks[j])
+			if iAccel > 0 {
+				ship.Accelerate(0.1)
+				ship.SetForwardThrush()
+			} else if iAccel < 0 {
+				ship.Accelerate(-0.1)
+				ship.SetBackwardTrush()
+			} else {
+				ship.SetIdle()
 			}
+
+			ship.UpdatePosition()
+
+			// Keep Ship inside screen
+			p := ship.pos
+			if p.x < 0.0 {
+				p.x = WIN_WIDTH
+			} else if p.x > WIN_WIDTH {
+				p.x = 0.0
+			}
+			if p.y < 0.0 {
+				p.y = WIN_HEIGHT
+			} else if p.y > WIN_HEIGHT {
+				p.y = 0.0
+			}
+			ship.pos = p
+
+			//-- Bullets
+			for _, b := range bullets {
+				b.UpdatePosition()
+
+				//--
+				for _, rock := range rocks {
+					if b.CollideRock(rock) {
+						rock.fDelete = true
+						if rock.mass > 1 {
+							//-- SubDivide
+							m := rock.mass / 2
+							v := rock.veloVec
+							n := v.NormalVector()
+							un := n.UnitVector()
+							un.MulScalar(16)
+
+							v1 := v
+							v1.AddVector(n)
+
+							p1 := rock.pos
+							v10 := v
+							v10.MulScalar(16)
+							v10.AddVector(un)
+							uv10 := v10.UnitVector()
+							uv10.MulScalar(21)
+							p1.AddVector(uv10)
+							rocks = append(rocks, NewRock(p1, v1, m))
+
+							v2 := v
+							v2.SubVector(n)
+
+							p2 := rock.pos
+							v20 := v
+							v20.MulScalar(16)
+							v20.SubVector(un)
+							uv20 := v20.UnitVector()
+							uv20.MulScalar(21)
+							p2.AddVector(uv20)
+							rocks = append(rocks, NewRock(p2, v2, m))
+							//fPause = true
+						}
+						b.fDelete = true
+						break
+					}
+				}
+
+				//-- Check for out range
+				if (b.pos.x < 0) || (b.pos.x > WIN_WIDTH) || (b.pos.y < 0) || (b.pos.y > WIN_HEIGHT) {
+					b.SetDelete(true)
+				}
+			}
+
+			//-- Update Rocks Slices
+			tmpRock1 := rocks[:0]
+			for _, r := range rocks {
+				if !r.fDelete {
+					tmpRock1 = append(tmpRock1, r)
+				}
+			}
+			rocks = tmpRock1
+
+			//-- Rocks
+			for _, rock := range rocks {
+				rock.UpdatePosition()
+				rock.CollideSreenFrame(screenFrame)
+
+			}
+
+			var r *Rock
+			for i := 0; i < len(rocks); i++ {
+				r = rocks[i]
+				for j := i + 1; j < len(rocks); j++ {
+					r.CollideRock(rocks[j])
+				}
+			}
+
 		}
 
 		//fmt.Printf("iRotate = %d\n", int32(ship.a))
@@ -277,8 +404,12 @@ func main() {
 			}
 		}
 
-		for _, rock := range rocks {
-			rock.Draw(renderer)
+		for i, rock := range rocks {
+			if i == 10 {
+				rock.Draw(renderer)
+			} else {
+				rock.Draw(renderer)
+			}
 		}
 
 		// if surface, err = window.GetSurface(); err == nil {
@@ -300,7 +431,7 @@ func main() {
 
 		//fmt.Printf("nb bullets = %d\n", len(bullets))
 
-		sdl.Delay(20)
+		sdl.Delay(15)
 
 	}
 

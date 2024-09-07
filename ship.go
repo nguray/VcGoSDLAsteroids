@@ -58,19 +58,19 @@ func (sh *Ship) Draw(renderer *sdl.Renderer) {
 	//--
 	renderer.SetDrawColor(255, 0, 0, 255)
 
-	x1 := sh.pos.x
-	y1 := sh.pos.y
-	renderer.DrawLine(int32(x1-5), int32(y1), int32(x1+5), int32(y1))
-	renderer.DrawLine(int32(x1), int32(y1-5), int32(x1), int32(y1+5))
+	// x1 := sh.pos.x
+	// y1 := sh.pos.y
+	// renderer.DrawLine(int32(x1-5), int32(y1), int32(x1+5), int32(y1))
+	// renderer.DrawLine(int32(x1), int32(y1-5), int32(x1), int32(y1+5))
 
-	x2 := x1 + 30.0*sh.thrushUnitVec.x
-	y2 := y1 + 30.0*sh.thrushUnitVec.y
-	renderer.DrawLine(int32(x1), int32(y1), int32(x2), int32(y2))
+	// x2 := x1 + 30.0*sh.thrushUnitVec.x
+	// y2 := y1 + 30.0*sh.thrushUnitVec.y
+	// renderer.DrawLine(int32(x1), int32(y1), int32(x2), int32(y2))
 
-	thrushNormalVec := sh.thrushUnitVec.NormalVector()
-	x2 = x1 + 30.0*thrushNormalVec.x
-	y2 = y1 + 30.0*thrushNormalVec.y
-	renderer.DrawLine(int32(x1), int32(y1), int32(x2), int32(y2))
+	// thrushNormalVec := sh.thrushUnitVec.NormalVector()
+	// x2 = x1 + 30.0*thrushNormalVec.x
+	// y2 = y1 + 30.0*thrushNormalVec.y
+	// renderer.DrawLine(int32(x1), int32(y1), int32(x2), int32(y2))
 
 }
 
