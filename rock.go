@@ -54,6 +54,10 @@ func (r *Rock) UpdatePosition() {
 	r.pos.AddVector(r.veloVec)
 }
 
+func (r Rock) IsDelete() bool {
+	return r.fDelete
+}
+
 func DrawCircle(renderer *sdl.Renderer, x, y, radius int32) {
 
 	var offsetX int32 = 0

@@ -57,12 +57,14 @@ var (
 
 func NewGame() {
 
+	bullets = bullets[:0]
 	//--
 	for i := 0; i < 5; i++ {
-		rocks = append(rocks, NewRandomRock())
+		r := NewRandomRock()
+		rocks = append(rocks, r)
 	}
 	ship.SetPosition(Vector2f{WIN_WIDTH / 2, WIN_HEIGHT / 2})
-	bullets = bullets[:0]
+
 }
 
 func FireBullet() {
@@ -72,7 +74,8 @@ func FireBullet() {
 	} else {
 		v := ship.DirectionVec()
 		v.MulScalar(5.0)
-		bullets = append(bullets, NewBullet(ship.pos, v))
+		b := NewBullet(ship.pos, v)
+		bullets = append(bullets, b)
 		laser_snd.Play(-1, 0)
 	}
 
@@ -178,7 +181,7 @@ func main() {
 
 	NewGame()
 
-	//--
+	//--drawObjects
 	//startH := time.Now()
 	//startV := startH
 	//startR := startH
@@ -384,7 +387,51 @@ func main() {
 							v10.MulScalar(16)
 							v10.AddVector(un)
 							uv10 := v10.UnitVector()
-							uv10.MulScalar(21)
+							uv10.MulScalar(12)
+							p1.AddVector(uv10)
+							r1 := NewRock(p1, v1, m)
+							rocks = append(rocks, r1)
+
+							v2 := v
+							v2.SubVector(n)
+
+							p2 := rock.pos
+							v20 := v
+							v20.MulScalar(12)
+							v20.SubVector(un)
+							uv20 := v20.UnitVector()
+							uv20.MulScalar(16)
+							p2.AddVector(uv20)
+							r2 := NewRock(p2, v2, m)
+							rocks = append(rocks, r2)
+
+							p3 := rock.pos
+							v30 := rock.veloVec
+							v30.MulScalar(-1)
+							uV30 := v30.UnitVector()
+							uV30.MulScalar(12)
+							p3.AddVector(uV30)
+							r3 := NewRock(p3, v30, m)
+							rocks = append(rocks, r3)
+
+							//fPause = true
+						} else if rock.mass == 1 {
+							//-- SubDivide
+							m := rock.mass / 2
+							v := rock.veloVec
+							n := v.NormalVector()
+							un := n.UnitVector()
+							un.MulScalar(16)
+
+							v1 := v
+							v1.AddVector(n)
+
+							p1 := rock.pos
+							v10 := v
+							v10.MulScalar(16)
+							v10.AddVector(un)
+							uv10 := v10.UnitVector()
+							uv10.MulScalar(12)
 							p1.AddVector(uv10)
 							rocks = append(rocks, NewRock(p1, v1, m))
 
@@ -393,19 +440,14 @@ func main() {
 
 							p2 := rock.pos
 							v20 := v
-							v20.MulScalar(16)
+							v20.MulScalar(12)
 							v20.SubVector(un)
 							uv20 := v20.UnitVector()
-							uv20.MulScalar(21)
+							uv20.MulScalar(16)
 							p2.AddVector(uv20)
 							rocks = append(rocks, NewRock(p2, v2, m))
-
-							p3 := rock.pos
-							v30 := v
-							v30.MulScalar(-1)
-							rocks = append(rocks, NewRock(p3, v30, m))
-
 							//fPause = true
+
 						}
 						b.fDelete = true
 						break
@@ -419,27 +461,26 @@ func main() {
 
 			}
 
-			//-- Update Rocks Slices
+			//-- Rocks
 			tmpRock1 := rocks[:0]
 			for _, r := range rocks {
-				if !r.fDelete {
+				if !r.IsDelete() {
+					r.UpdatePosition()
+					r.CollideSreenFrame(screenFrame)
 					tmpRock1 = append(tmpRock1, r)
 				}
 			}
 			rocks = tmpRock1
 
-			//-- Rocks
-			for _, rock := range rocks {
-				rock.UpdatePosition()
-				rock.CollideSreenFrame(screenFrame)
-
-			}
-
 			var r *Rock
 			for i := 0; i < len(rocks); i++ {
 				r = rocks[i]
-				for j := i + 1; j < len(rocks); j++ {
-					r.CollideRock(rocks[j])
+				if r.fDelete {
+					fmt.Printf("rocks %v\n", r)
+				} else {
+					for j := i + 1; j < len(rocks); j++ {
+						r.CollideRock(rocks[j])
+					}
 				}
 			}
 
@@ -452,19 +493,23 @@ func main() {
 
 		ship.Draw(renderer)
 
+		tmpBullets := bullets[:0]
 		for _, b := range bullets {
 			if !b.fDelete {
 				b.Draw(renderer)
+				tmpBullets = append(tmpBullets, b)
 			}
 		}
+		bullets = tmpBullets
 
-		for i, rock := range rocks {
-			if i == 10 {
-				rock.Draw(renderer)
-			} else {
-				rock.Draw(renderer)
+		rocksTemp := rocks[:0]
+		for _, r := range rocks {
+			if !r.IsDelete() {
+				r.Draw(renderer)
+				rocksTemp = append(rocksTemp, r)
 			}
 		}
+		rocks = rocksTemp
 
 		// if surface, err = window.GetSurface(); err == nil {
 		// 	shipSprite.BlitScaled(nil, surface, &sdl.Rect{X: 100, Y: 100, W: 32, H: 32})
@@ -473,15 +518,6 @@ func main() {
 
 		//--
 		renderer.Present()
-
-		//-- Update Bullets Slices
-		tmp := bullets[:0]
-		for _, b := range bullets {
-			if !b.fDelete {
-				tmp = append(tmp, b)
-			}
-		}
-		bullets = tmp
 
 		if len(rocks) == 0 {
 			NewGame()

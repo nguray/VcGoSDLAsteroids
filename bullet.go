@@ -16,6 +16,10 @@ func (bul *Bullet) SetDelete(f bool) {
 	bul.fDelete = f
 }
 
+func (bul *Bullet) IsDelete() bool {
+	return bul.fDelete
+}
+
 func (bul *Bullet) UpdatePosition() {
 	bul.pos.AddVector(bul.veloVect)
 }
