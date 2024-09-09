@@ -21,6 +21,15 @@ import (
 
 type GameMode int
 
+type GameObject interface {
+	SetPosition(p Vector2f)
+	GetPosition() Vector2f
+	GetVelocity() Vector2f
+	SetVelocity(v Vector2f)
+	GetMass() float64
+	GetRadius() float64
+}
+
 const (
 	STANDBY GameMode = iota
 	PLAY
@@ -77,6 +86,58 @@ func FireBullet() {
 		b := NewBullet(ship.pos, v)
 		bullets = append(bullets, b)
 		laser_snd.Play(-1, 0)
+	}
+
+}
+
+func DoCollision(object0, object1 GameObject) {
+	//---------------------------------------
+	p0 := object0.GetPosition()
+	p1 := object1.GetPosition()
+	m0 := object0.GetMass()
+	m1 := object1.GetMass()
+	r0 := object0.GetRadius()
+	r1 := object1.GetRadius()
+	veloVec0 := object0.GetVelocity()
+	veloVec1 := object1.GetVelocity()
+
+	v := p1
+	v.SubVector(p0)
+	d := v.Magnitude()
+	if d <= (r0 + r1) {
+		//mt.Print("Collision\n")
+
+		nV12 := v
+		tV12 := nV12.NormalVector()
+
+		unV12 := nV12.UnitVector()
+		utV12 := tV12.UnitVector()
+
+		nV1 := veloVec0.Dot(unV12)
+		tV1 := veloVec0.Dot(utV12)
+		nV2 := veloVec1.Dot(unV12)
+		tV2 := veloVec1.Dot(utV12)
+
+		sumMass := m0 + m1
+		nV1c := (nV1*(m0-m1) + 2*m1*nV2) / sumMass
+		nV2c := (nV2*(m1-m0) + 2*m0*nV1) / sumMass
+
+		//--
+		v0 := unV12
+		v0.MulScalar(nV1c)
+		newVeloVec0 := utV12
+		newVeloVec0.MulScalar(tV1)
+		newVeloVec0.AddVector(v0)
+		object0.SetVelocity(newVeloVec0)
+
+		//--
+		v1 := unV12
+		v1.MulScalar(nV2c)
+		newVeloVec1 := utV12
+		newVeloVec1.MulScalar(tV2)
+		newVeloVec1.AddVector(v1)
+		object1.SetVelocity(newVeloVec1)
+
 	}
 
 }
@@ -369,83 +430,104 @@ func main() {
 				//--
 				for _, rock := range rocks {
 					if b.CollideRock(rock) {
+
 						rock.fDelete = true
+
 						explosion_snd.Play(-1, 0)
+
 						if rock.mass == 2 {
 							//-- SubDivide
 							m := rock.mass / 3
-							v := rock.veloVec
-							n := v.NormalVector()
-							un := n.UnitVector()
-							un.MulScalar(16)
+							uv := rock.veloVec.UnitVector()
+							un := uv.NormalVector()
+							normeV := rock.veloVec.Magnitude()
 
-							v1 := v
-							v1.AddVector(n)
-
-							p1 := rock.pos
-							v10 := v
-							v10.MulScalar(16)
+							v10 := uv
 							v10.AddVector(un)
+							v10.MulScalar(10)
+							p10 := rock.pos
+							p10.AddVector(v10)
 							uv10 := v10.UnitVector()
-							uv10.MulScalar(12)
-							p1.AddVector(uv10)
-							r1 := NewRock(p1, v1, m)
-							rocks = append(rocks, r1)
+							uv10.MulScalar(normeV)
+							rocks = append(rocks, NewRock(p10, uv10, m))
 
-							v2 := v
-							v2.SubVector(n)
-
-							p2 := rock.pos
-							v20 := v
-							v20.MulScalar(12)
+							v20 := uv
 							v20.SubVector(un)
+							v20.MulScalar(10)
+							p20 := rock.pos
+							p20.AddVector(v20)
 							uv20 := v20.UnitVector()
-							uv20.MulScalar(16)
-							p2.AddVector(uv20)
-							r2 := NewRock(p2, v2, m)
-							rocks = append(rocks, r2)
+							uv20.MulScalar(normeV)
+							rocks = append(rocks, NewRock(p20, uv20, m))
 
-							p3 := rock.pos
-							v30 := rock.veloVec
+							v30 := uv
 							v30.MulScalar(-1)
-							uV30 := v30.UnitVector()
-							uV30.MulScalar(12)
-							p3.AddVector(uV30)
-							r3 := NewRock(p3, v30, m)
-							rocks = append(rocks, r3)
+							v30.AddVector(un)
+							v30.MulScalar(10)
+							p30 := rock.pos
+							p30.AddVector(v30)
+							uv30 := v30.UnitVector()
+							uv30.MulScalar(normeV)
+							rocks = append(rocks, NewRock(p30, uv30, m))
+
+							v40 := uv
+							v40.MulScalar(-1)
+							v40.SubVector(un)
+							v40.MulScalar(10)
+							p40 := rock.pos
+							p40.AddVector(v40)
+							uv40 := v40.UnitVector()
+							uv40.MulScalar(normeV)
+							rocks = append(rocks, NewRock(p40, uv40, m))
 
 							//fPause = true
+
 						} else if rock.mass == 1 {
+
 							//-- SubDivide
 							m := rock.mass / 2
-							v := rock.veloVec
-							n := v.NormalVector()
-							un := n.UnitVector()
-							un.MulScalar(16)
+							uv := rock.veloVec.UnitVector()
+							un := uv.NormalVector()
+							normeV := rock.veloVec.Magnitude()
 
-							v1 := v
-							v1.AddVector(n)
-
-							p1 := rock.pos
-							v10 := v
-							v10.MulScalar(16)
+							v10 := uv
 							v10.AddVector(un)
+							v10.MulScalar(10)
+							p10 := rock.pos
+							p10.AddVector(v10)
 							uv10 := v10.UnitVector()
-							uv10.MulScalar(12)
-							p1.AddVector(uv10)
-							rocks = append(rocks, NewRock(p1, v1, m))
+							uv10.MulScalar(normeV)
+							rocks = append(rocks, NewRock(p10, uv10, m))
 
-							v2 := v
-							v2.SubVector(n)
-
-							p2 := rock.pos
-							v20 := v
-							v20.MulScalar(12)
+							v20 := uv
 							v20.SubVector(un)
+							v20.MulScalar(10)
+							p20 := rock.pos
+							p20.AddVector(v20)
 							uv20 := v20.UnitVector()
-							uv20.MulScalar(16)
-							p2.AddVector(uv20)
-							rocks = append(rocks, NewRock(p2, v2, m))
+							uv20.MulScalar(normeV)
+							rocks = append(rocks, NewRock(p20, uv20, m))
+
+							v30 := uv
+							v30.MulScalar(-1)
+							v30.AddVector(un)
+							v30.MulScalar(10)
+							p30 := rock.pos
+							p30.AddVector(v30)
+							uv30 := v30.UnitVector()
+							uv30.MulScalar(normeV)
+							rocks = append(rocks, NewRock(p30, uv30, m))
+
+							v40 := uv
+							v40.MulScalar(-1)
+							v40.SubVector(un)
+							v40.MulScalar(10)
+							p40 := rock.pos
+							p40.AddVector(v40)
+							uv40 := v40.UnitVector()
+							uv40.MulScalar(normeV)
+							rocks = append(rocks, NewRock(p40, uv40, m))
+
 							//fPause = true
 
 						}
@@ -472,14 +554,19 @@ func main() {
 			}
 			rocks = tmpRock1
 
+			// Do collison Ship<->Rock
+			for _, r := range rocks {
+				DoCollision(ship, r)
+			}
+
+			// Do collison between rocks
 			var r *Rock
 			for i := 0; i < len(rocks); i++ {
 				r = rocks[i]
-				if r.fDelete {
-					fmt.Printf("rocks %v\n", r)
-				} else {
+				if !r.fDelete {
 					for j := i + 1; j < len(rocks); j++ {
-						r.CollideRock(rocks[j])
+						DoCollision(r, rocks[j])
+						//r.CollideRock(rocks[j])
 					}
 				}
 			}

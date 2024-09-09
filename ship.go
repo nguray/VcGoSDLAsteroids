@@ -10,6 +10,8 @@ type Ship struct {
 	pos           Vector2f
 	a             float64
 	veloVec       Vector2f
+	mass          float64
+	radius        float64
 	thrushUnitVec Vector2f
 	curTex        *sdl.Texture
 	idleTex       *sdl.Texture
@@ -23,7 +25,12 @@ func ShipNew(p Vector2f, a float64) *Ship {
 	unitVec := Vector2f{math.Cos(ra), math.Sin(ra)}
 	v := unitVec
 	v.MulScalar(0.1)
-	return &Ship{pos: p, a: a, veloVec: v, thrushUnitVec: unitVec}
+
+	sh := &Ship{pos: p, a: a, veloVec: v, thrushUnitVec: unitVec}
+	sh.mass = 2
+	sh.radius = 7.0 * sh.mass
+
+	return sh
 }
 
 func (sh *Ship) SetAngle(a float64) {
@@ -50,14 +57,16 @@ func (sh *Ship) OffsetAngle(da float64) {
 
 func (sh *Ship) Draw(renderer *sdl.Renderer) {
 
+	//--
+	renderer.SetDrawColor(60, 60, 0, 255)
+	DrawCircle(renderer, int32(sh.pos.x), int32(sh.pos.y), int32(sh.radius))
+
+	//--
 	src := sdl.Rect{X: 0, Y: 0, W: 32, H: 32}
 	x := int32(sh.pos.x) - 15
 	y := int32(sh.pos.y) - 15
 	dst := sdl.Rect{X: x, Y: y, W: 32, H: 32}
 	renderer.CopyEx(sh.curTex, &src, &dst, sh.a+90.0, nil, sdl.FLIP_NONE)
-
-	//--
-	renderer.SetDrawColor(255, 0, 0, 255)
 
 	// x1 := sh.pos.x
 	// y1 := sh.pos.y
@@ -94,6 +103,26 @@ func (sh *Ship) DirectionVec() Vector2f {
 	return Vector2f{math.Cos(ra), math.Sin(ra)}
 }
 
+func (sh *Ship) GetPosition() Vector2f {
+	return sh.pos
+}
+
 func (sh *Ship) SetPosition(p Vector2f) {
 	sh.pos = p
+}
+
+func (sh *Ship) GetVelocity() Vector2f {
+	return sh.veloVec
+}
+
+func (sh *Ship) SetVelocity(v Vector2f) {
+	sh.veloVec = v
+}
+
+func (sh *Ship) GetMass() float64 {
+	return sh.mass
+}
+
+func (sh *Ship) GetRadius() float64 {
+	return sh.radius
 }

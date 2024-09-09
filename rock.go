@@ -7,17 +7,19 @@ import (
 )
 
 type Rock struct {
-	pos     Vector2f
-	veloVec Vector2f
-	mass    float64
-	radius  float64
-	fDelete bool
+	pos      Vector2f
+	veloVec  Vector2f
+	mass     float64
+	radius   float64
+	iExplode int
+	fDelete  bool
 }
 
 func NewRock(p Vector2f, v Vector2f, m float64) *Rock {
 	rck := &Rock{pos: p, veloVec: v, mass: m}
 	rck.radius = 10.0 * m
 	rck.fDelete = false
+	rck.iExplode = 0
 	return rck
 }
 
@@ -41,7 +43,7 @@ func NewRandomRock() *Rock {
 	ra := float64(myRand.Intn(360)) * math.Pi / 180.0
 	rck := &Rock{
 		pos:     Vector2f{float64(px), float64(py)},
-		veloVec: Vector2f{1.2 * math.Cos(ra), 1.2 * math.Sin(ra)},
+		veloVec: Vector2f{1.3 * math.Cos(ra), 1.3 * math.Sin(ra)},
 		mass:    m,
 		radius:  10.0 * m,
 		fDelete: false,
@@ -161,4 +163,28 @@ func (r *Rock) CollideRock(r1 *Rock) {
 
 	}
 
+}
+
+func (r *Rock) GetPosition() Vector2f {
+	return r.pos
+}
+
+func (r *Rock) SetPosition(p Vector2f) {
+	r.pos = p
+}
+
+func (r *Rock) GetVelocity() Vector2f {
+	return r.veloVec
+}
+
+func (r *Rock) SetVelocity(v Vector2f) {
+	r.veloVec = v
+}
+
+func (r *Rock) GetMass() float64 {
+	return r.mass
+}
+
+func (r *Rock) GetRadius() float64 {
+	return r.radius
 }
