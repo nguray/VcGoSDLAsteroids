@@ -43,7 +43,7 @@ func NewRandomRock() *Rock {
 	ra := float64(myRand.Intn(360)) * math.Pi / 180.0
 	rck := &Rock{
 		pos:     Vector2f{float64(px), float64(py)},
-		veloVec: Vector2f{1.3 * math.Cos(ra), 1.3 * math.Sin(ra)},
+		veloVec: Vector2f{1.35 * math.Cos(ra), 1.35 * math.Sin(ra)},
 		mass:    m,
 		radius:  10.0 * m,
 		fDelete: false,

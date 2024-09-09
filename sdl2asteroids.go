@@ -142,6 +142,30 @@ func DoCollision(object0, object1 GameObject) {
 
 }
 
+func DoSreenFrameCollison(object GameObject, s sdl.Rect) {
+	//---------------------------------------
+
+	radius := object.GetRadius()
+	pos := object.GetPosition()
+	veloVec := object.GetVelocity()
+
+	left := float64(s.X) + radius
+	top := float64(s.Y) + radius
+	right := float64(s.X+s.W) - radius
+	bottom := float64(s.Y+s.H) - radius
+
+	if pos.x <= float64(left) || pos.x > float64(right) {
+		veloVec.x = -veloVec.x
+	}
+
+	if pos.y <= float64(top) || pos.y > float64(bottom) {
+		veloVec.y = -veloVec.y
+	}
+
+	object.SetVelocity(veloVec)
+
+}
+
 func main() {
 
 	var renderer *sdl.Renderer
@@ -389,9 +413,9 @@ func main() {
 		// renderer.FillRects(rects)
 
 		if iRotate < 0 {
-			ship.OffsetAngle(2.0)
+			ship.OffsetAngle(1.5)
 		} else if iRotate > 0 {
-			ship.OffsetAngle(-2.0)
+			ship.OffsetAngle(-1.5)
 		}
 
 		if !fPause {
@@ -409,18 +433,7 @@ func main() {
 			ship.UpdatePosition()
 
 			// Keep Ship inside screen
-			p := ship.pos
-			if p.x < 0.0 {
-				p.x = WIN_WIDTH
-			} else if p.x > WIN_WIDTH {
-				p.x = 0.0
-			}
-			if p.y < 0.0 {
-				p.y = WIN_HEIGHT
-			} else if p.y > WIN_HEIGHT {
-				p.y = 0.0
-			}
-			ship.pos = p
+			DoSreenFrameCollison(ship, screenFrame)
 
 			//-- Bullets
 			for _, b := range bullets {
@@ -440,7 +453,7 @@ func main() {
 							m := rock.mass / 3
 							uv := rock.veloVec.UnitVector()
 							un := uv.NormalVector()
-							normeV := rock.veloVec.Magnitude()
+							normeV := rock.veloVec.Magnitude() * 1.5
 
 							v10 := uv
 							v10.AddVector(un)
@@ -548,7 +561,7 @@ func main() {
 			for _, r := range rocks {
 				if !r.IsDelete() {
 					r.UpdatePosition()
-					r.CollideSreenFrame(screenFrame)
+					DoSreenFrameCollison(r, screenFrame)
 					tmpRock1 = append(tmpRock1, r)
 				}
 			}
@@ -566,7 +579,6 @@ func main() {
 				if !r.fDelete {
 					for j := i + 1; j < len(rocks); j++ {
 						DoCollision(r, rocks[j])
-						//r.CollideRock(rocks[j])
 					}
 				}
 			}
