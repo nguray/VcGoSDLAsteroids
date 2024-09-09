@@ -429,7 +429,7 @@ func main() {
 
 				//--
 				for _, rock := range rocks {
-					if b.CollideRock(rock) {
+					if b.HitRock(rock) {
 
 						rock.fDelete = true
 

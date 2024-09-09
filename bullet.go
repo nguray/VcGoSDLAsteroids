@@ -24,7 +24,7 @@ func (bul *Bullet) UpdatePosition() {
 	bul.pos.AddVector(bul.veloVect)
 }
 
-func (bul *Bullet) CollideRock(rock *Rock) bool {
+func (bul *Bullet) HitRock(rock *Rock) bool {
 
 	v := bul.pos
 	v.SubVector(rock.pos)
