@@ -371,7 +371,7 @@ func main() {
 					if b.CollideRock(rock) {
 						rock.fDelete = true
 						explosion_snd.Play(-1, 0)
-						if rock.mass > 1 {
+						if rock.mass == 2 {
 							//-- SubDivide
 							m := rock.mass / 3
 							v := rock.veloVec
@@ -484,6 +484,10 @@ func main() {
 				}
 			}
 
+		} else {
+			if iAccel != 0 {
+				fPause = false
+			}
 		}
 
 		//------------------------------------------------------------
