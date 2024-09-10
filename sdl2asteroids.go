@@ -142,12 +142,19 @@ func DoCollision(object0, object1 GameObject) {
 
 }
 
-func DoSreenFrameCollison(object GameObject, s sdl.Rect) {
-	//---------------------------------------
+type GenericBounce interface {
+	*Rock | *Ship
+	GetRadius() float64
+	GetPosition() Vector2f
+	GetVelocity() Vector2f
+	SetVelocity(v Vector2f)
+}
 
-	radius := object.GetRadius()
-	pos := object.GetPosition()
-	veloVec := object.GetVelocity()
+func DoSreenFrameCollison[T GenericBounce](obj T, s sdl.Rect) {
+	//---------------------------------------
+	radius := obj.GetRadius()
+	pos := obj.GetPosition()
+	veloVec := obj.GetVelocity()
 
 	left := float64(s.X) + radius
 	top := float64(s.Y) + radius
@@ -161,8 +168,7 @@ func DoSreenFrameCollison(object GameObject, s sdl.Rect) {
 	if pos.y <= float64(top) || pos.y > float64(bottom) {
 		veloVec.y = -veloVec.y
 	}
-
-	object.SetVelocity(veloVec)
+	obj.SetVelocity(veloVec)
 
 }
 
@@ -267,7 +273,7 @@ func main() {
 	NewGame()
 
 	//--drawObjects
-	//startH := time.Now()
+	startExplodeUpdate := time.Now()
 	//startV := startH
 	//startR := startH
 
@@ -288,6 +294,8 @@ func main() {
 		// rect = sdl.Rect{X: int32(LEFT), Y: int32(TOP), W: int32(cellSize * NB_COLUMNS), H: int32(cellSize * NB_ROWS)}
 		// renderer.SetDrawColor(10, 10, 100, 255)
 		// renderer.FillRect(&rect)20
+
+		elapsedExplodeUpdate := time.Since(startExplodeUpdate)
 
 		//-- Process current mode Events
 		for event := sdl.PollEvent(); event != nil; event = sdl.PollEvent() {
@@ -412,6 +420,18 @@ func main() {
 		// renderer.SetDrawColor(255, 0, 255, 255)
 		// renderer.FillRects(rects)
 
+		if elapsedExplodeUpdate.Milliseconds() > 250 {
+			startExplodeUpdate = time.Now()
+			for _, r := range rocks {
+				if r.iExplode > 0 {
+					r.iExplode += 1
+					if r.iExplode > 3 {
+						r.fDelete = true
+					}
+				}
+			}
+		}
+
 		if iRotate < 0 {
 			ship.OffsetAngle(1.5)
 		} else if iRotate > 0 {
@@ -436,19 +456,20 @@ func main() {
 			DoSreenFrameCollison(ship, screenFrame)
 
 			//-- Bullets
+			tmpBullets := bullets[:0]
 			for _, b := range bullets {
 
 				b.UpdatePosition()
+				fHit := false
 
 				//--
 				for _, rock := range rocks {
 					if b.HitRock(rock) {
-
-						rock.fDelete = true
-
+						fHit = true
 						explosion_snd.Play(-1, 0)
 
 						if rock.mass == 2 {
+							rock.fDelete = true
 							//-- SubDivide
 							m := rock.mass / 3
 							uv := rock.veloVec.UnitVector()
@@ -494,8 +515,8 @@ func main() {
 							rocks = append(rocks, NewRock(p40, uv40, m))
 
 							//fPause = true
-
 						} else if rock.mass == 1 {
+							rock.fDelete = true
 
 							//-- SubDivide
 							m := rock.mass / 2
@@ -542,19 +563,27 @@ func main() {
 							rocks = append(rocks, NewRock(p40, uv40, m))
 
 							//fPause = true
+						} else {
+							rock.iExplode = 1
 
 						}
-						b.fDelete = true
 						break
 					}
 				}
 
-				//-- Check for out range
-				if (b.pos.x < 0) || (b.pos.x > WIN_WIDTH) || (b.pos.y < 0) || (b.pos.y > WIN_HEIGHT) {
-					b.SetDelete(true)
+				if !fHit {
+					//-- Check for out range
+					if (b.pos.x < 0) || (b.pos.x > WIN_WIDTH) || (b.pos.y < 0) || (b.pos.y > WIN_HEIGHT) {
+						fHit = true
+					}
+
 				}
 
+				if !fHit {
+					tmpBullets = append(tmpBullets, b)
+				}
 			}
+			bullets = tmpBullets
 
 			//-- Rocks
 			tmpRock1 := rocks[:0]
@@ -569,16 +598,21 @@ func main() {
 
 			// Do collison Ship<->Rock
 			for _, r := range rocks {
-				DoCollision(ship, r)
+				if !r.fDelete && r.iExplode == 0 {
+					DoCollision(ship, r)
+				}
 			}
 
 			// Do collison between rocks
-			var r *Rock
+			var r, r1 *Rock
 			for i := 0; i < len(rocks); i++ {
 				r = rocks[i]
-				if !r.fDelete {
+				if !r.fDelete && r.iExplode == 0 {
 					for j := i + 1; j < len(rocks); j++ {
-						DoCollision(r, rocks[j])
+						r1 = rocks[j]
+						if !r1.fDelete && r1.iExplode == 0 {
+							DoCollision(r, r1)
+						}
 					}
 				}
 			}
@@ -596,14 +630,9 @@ func main() {
 
 		ship.Draw(renderer)
 
-		tmpBullets := bullets[:0]
 		for _, b := range bullets {
-			if !b.fDelete {
-				b.Draw(renderer)
-				tmpBullets = append(tmpBullets, b)
-			}
+			b.Draw(renderer)
 		}
-		bullets = tmpBullets
 
 		rocksTemp := rocks[:0]
 		for _, r := range rocks {
@@ -630,7 +659,7 @@ func main() {
 			sdl.Delay(500)
 		}
 
-		//fmt.Printf("nb bullets = %d\n", len(bullets))
+		fmt.Printf("nb bullets = %d\n", len(bullets))
 
 		sdl.Delay(15)
 

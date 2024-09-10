@@ -29,7 +29,6 @@ func ShipNew(p Vector2f, a float64) *Ship {
 	sh := &Ship{pos: p, a: a, veloVec: v, thrushUnitVec: unitVec}
 	sh.mass = 2
 	sh.radius = 7.0 * sh.mass
-
 	return sh
 }
 

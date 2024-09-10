@@ -48,6 +48,7 @@ func NewRandomRock() *Rock {
 		radius:  10.0 * m,
 		fDelete: false,
 	}
+	rck.iExplode = 0
 
 	return rck
 }
@@ -94,32 +95,36 @@ func DrawCircle(renderer *sdl.Renderer, x, y, radius int32) {
 
 func (r *Rock) Draw(renderer *sdl.Renderer) {
 
-	renderer.SetDrawColor(255, 255, 0, 255)
-	DrawCircle(renderer, int32(r.pos.x), int32(r.pos.y), int32(r.radius))
+	if r.iExplode == 0 {
 
-	x1 := r.pos.x
-	y1 := r.pos.y
-	v := r.veloVec
-	v.MulScalar(10)
-	x2 := x1 + v.x
-	y2 := y1 + v.y
-	renderer.DrawLine(int32(x1), int32(y1), int32(x2), int32(y2))
+		renderer.SetDrawColor(255, 255, 0, 255)
+		DrawCircle(renderer, int32(r.pos.x), int32(r.pos.y), int32(r.radius))
+		x1 := r.pos.x
+		y1 := r.pos.y
+		v := r.veloVec
+		v.MulScalar(10)
+		x2 := x1 + v.x
+		y2 := y1 + v.y
+		renderer.DrawLine(int32(x1), int32(y1), int32(x2), int32(y2))
 
-}
+	} else {
 
-func (r *Rock) CollideSreenFrame(s sdl.Rect) {
-	//---------------------------------------
-	left := float64(s.X) + r.radius
-	top := float64(s.Y) + r.radius
-	right := float64(s.X+s.W) - r.radius
-	bottom := float64(s.Y+s.H) - r.radius
+		renderer.SetDrawColor(255, 0, 0, 255)
 
-	if r.pos.x <= float64(left) || r.pos.x > float64(right) {
-		r.veloVec.x = -r.veloVec.x
-	}
+		for a := 0.0; a < 360; a += 60 {
+			ra := a * math.Pi / 180
+			uv10 := Vector2f{math.Cos(ra), math.Sin(ra)}
+			uv11 := uv10
+			d := float64(4 * r.iExplode)
+			uv10.MulScalar(d)
+			uv11.MulScalar(d + 2)
+			p1 := r.pos
+			p1.AddVector(uv10)
+			p2 := r.pos
+			p2.AddVector(uv11)
+			renderer.DrawLine(int32(p1.x), int32(p1.y), int32(p2.x), int32(p2.y))
+		}
 
-	if r.pos.y <= float64(top) || r.pos.y > float64(bottom) {
-		r.veloVec.y = -r.veloVec.y
 	}
 
 }
