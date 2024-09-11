@@ -279,10 +279,14 @@ func main() {
 
 	screenFrame := sdl.Rect{X: 0, Y: 0, W: WIN_WIDTH, H: WIN_HEIGHT}
 
+	// Precalculate Cosinuw and Sinus Values
+	PreCalculateCosSin()
+
 	iRotate := 0
 	iAccel := 0
 
 	fPause = true
+	fStep := false
 	running := true
 
 	for running {
@@ -406,6 +410,11 @@ func main() {
 						iAccel = 0
 					case sdl.K_DOWN:
 						iAccel = 0
+					case sdl.K_s:
+						if fPause {
+							fStep = true
+							fPause = false
+						}
 					}
 
 				}
@@ -419,18 +428,6 @@ func main() {
 		// rects = []sdl.Rect{{500, 300, 100, 100}, {200, 300, 200, 200}}
 		// renderer.SetDrawColor(255, 0, 255, 255)
 		// renderer.FillRects(rects)
-
-		if elapsedExplodeUpdate.Milliseconds() > 250 {
-			startExplodeUpdate = time.Now()
-			for _, r := range rocks {
-				if r.iExplode > 0 {
-					r.iExplode += 1
-					if r.iExplode > 3 {
-						r.fDelete = true
-					}
-				}
-			}
-		}
 
 		if iRotate < 0 {
 			ship.OffsetAngle(1.5)
@@ -565,6 +562,8 @@ func main() {
 							//fPause = true
 						} else {
 							rock.iExplode = 1
+							rock.InitExplosion()
+							//fPause = true
 
 						}
 						break
@@ -617,6 +616,19 @@ func main() {
 				}
 			}
 
+			if elapsedExplodeUpdate.Milliseconds() > 250 || fStep {
+				startExplodeUpdate = time.Now()
+				for _, r := range rocks {
+					if r.iExplode > 0 {
+						r.iExplode += 1
+						r.UpdateExplosion()
+						if r.iExplode > 4 {
+							r.fDelete = true
+						}
+					}
+				}
+			}
+
 		} else {
 			if iAccel != 0 {
 				fPause = false
@@ -648,6 +660,11 @@ func main() {
 		// 	window.UpdateSurface()
 		// }
 
+		if fStep {
+			fPause = true
+			fStep = false
+		}
+
 		//--
 		renderer.Present()
 
@@ -659,7 +676,7 @@ func main() {
 			sdl.Delay(500)
 		}
 
-		fmt.Printf("nb bullets = %d\n", len(bullets))
+		//fmt.Printf("nb bullets = %d\n", len(bullets))
 
 		sdl.Delay(15)
 

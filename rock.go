@@ -6,13 +6,32 @@ import (
 	"github.com/veandco/go-sdl2/sdl"
 )
 
+const (
+	NB_COSSINS = 6
+)
+
+var (
+	cos []float64
+	sin []float64
+)
+
+func PreCalculateCosSin() {
+	for i := 0; i < NB_COSSINS; i += 1 {
+		ra := float64(i*60) * math.Pi / 180
+		cos = append(cos, math.Cos(ra))
+		sin = append(sin, math.Sin(ra))
+	}
+}
+
 type Rock struct {
 	pos      Vector2f
 	veloVec  Vector2f
 	mass     float64
 	radius   float64
-	iExplode int
 	fDelete  bool
+	iExplode int
+	explVecs []Vector2f
+	points   []Vector2f
 }
 
 func NewRock(p Vector2f, v Vector2f, m float64) *Rock {
@@ -93,6 +112,30 @@ func DrawCircle(renderer *sdl.Renderer, x, y, radius int32) {
 
 }
 
+func (r *Rock) InitExplosion() {
+
+	for i := 0; i < NB_COSSINS; i++ {
+		d := float64(3)
+		v := Vector2f{cos[i], sin[i]}
+		v.MulScalar(d)
+		v1 := r.veloVec
+		v1.MulScalar(3)
+		v.AddVector(v1)
+		r.explVecs = append(r.explVecs, v)
+		p1 := r.pos
+		p1.AddVector(v)
+		r.points = append(r.points, p1)
+	}
+}
+
+func (r *Rock) UpdateExplosion() {
+	for i := 0; i < NB_COSSINS; i++ {
+		p := r.points[i]
+		p.AddVector(r.explVecs[i])
+		r.points[i] = p
+	}
+}
+
 func (r *Rock) Draw(renderer *sdl.Renderer) {
 
 	if r.iExplode == 0 {
@@ -109,19 +152,14 @@ func (r *Rock) Draw(renderer *sdl.Renderer) {
 
 	} else {
 
-		renderer.SetDrawColor(255, 0, 0, 255)
+		renderer.SetDrawColor(255, 255, 0, 255)
 
-		for a := 0.0; a < 360; a += 60 {
-			ra := a * math.Pi / 180
-			uv10 := Vector2f{math.Cos(ra), math.Sin(ra)}
-			uv11 := uv10
-			d := float64(4 * r.iExplode)
-			uv10.MulScalar(d)
-			uv11.MulScalar(d + 2)
-			p1 := r.pos
-			p1.AddVector(uv10)
-			p2 := r.pos
-			p2.AddVector(uv11)
+		for i := 0; i < NB_COSSINS; i++ {
+			p1 := r.points[i]
+			p2 := p1
+			uv := r.explVecs[i].UnitVector()
+			uv.MulScalar(2)
+			p2.AddVector(uv)
 			renderer.DrawLine(int32(p1.x), int32(p1.y), int32(p2.x), int32(p2.y))
 		}
 
