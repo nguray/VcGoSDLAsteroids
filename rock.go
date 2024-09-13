@@ -16,7 +16,7 @@ var (
 )
 
 func PreCalculateCosSin() {
-	for i := 0; i < NB_COSSINS; i += 1 {
+	for i := range NB_COSSINS {
 		ra := float64(i*60) * math.Pi / 180
 		cos = append(cos, math.Cos(ra))
 		sin = append(sin, math.Sin(ra))
@@ -114,13 +114,13 @@ func DrawCircle(renderer *sdl.Renderer, x, y, radius int32) {
 
 func (r *Rock) InitExplosion() {
 
-	for i := 0; i < NB_COSSINS; i++ {
-		d := float64(3)
+	for i := range NB_COSSINS {
+		d := float64(2)
 		v := Vector2f{cos[i], sin[i]}
 		v.MulScalar(d)
-		v1 := r.veloVec
-		v1.MulScalar(3)
-		v.AddVector(v1)
+		//v1 := r.veloVec
+		//v1.MulScalar(3)
+		//v.AddVector(v1)
 		r.explVecs = append(r.explVecs, v)
 		p1 := r.pos
 		p1.AddVector(v)
@@ -129,8 +129,11 @@ func (r *Rock) InitExplosion() {
 }
 
 func (r *Rock) UpdateExplosion() {
-	for i := 0; i < NB_COSSINS; i++ {
+	for i := range NB_COSSINS {
 		p := r.points[i]
+		v := r.veloVec
+		v.MulScalar(3)
+		p.AddVector(v)
 		p.AddVector(r.explVecs[i])
 		r.points[i] = p
 	}
@@ -154,8 +157,7 @@ func (r *Rock) Draw(renderer *sdl.Renderer) {
 
 		renderer.SetDrawColor(255, 255, 0, 255)
 
-		for i := 0; i < NB_COSSINS; i++ {
-			p1 := r.points[i]
+		for i, p1 := range r.points {
 			p2 := p1
 			uv := r.explVecs[i].UnitVector()
 			uv.MulScalar(2)

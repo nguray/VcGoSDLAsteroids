@@ -68,7 +68,7 @@ func NewGame() {
 
 	bullets = bullets[:0]
 	//--
-	for i := 0; i < 5; i++ {
+	for _ = range 5 {
 		r := NewRandomRock()
 		rocks = append(rocks, r)
 	}
@@ -80,13 +80,12 @@ func FireBullet() {
 
 	if fPause {
 		fPause = false
-	} else {
-		v := ship.DirectionVec()
-		v.MulScalar(5.0)
-		b := NewBullet(ship.pos, v)
-		bullets = append(bullets, b)
-		laser_snd.Play(-1, 0)
 	}
+	v := ship.DirectionVec()
+	v.MulScalar(5.0)
+	b := NewBullet(ship.pos, v)
+	bullets = append(bullets, b)
+	laser_snd.Play(-1, 0)
 
 }
 
@@ -430,9 +429,9 @@ func main() {
 		// renderer.FillRects(rects)
 
 		if iRotate < 0 {
-			ship.OffsetAngle(1.5)
+			ship.OffsetAngle(2)
 		} else if iRotate > 0 {
-			ship.OffsetAngle(-1.5)
+			ship.OffsetAngle(-2)
 		}
 
 		if !fPause {
@@ -449,7 +448,7 @@ func main() {
 
 			ship.UpdatePosition()
 
-			// Keep Ship inside screen
+			// Keep Ship inside) screen
 			DoSreenFrameCollison(ship, screenFrame)
 
 			//-- Bullets
@@ -616,7 +615,7 @@ func main() {
 				}
 			}
 
-			if elapsedExplodeUpdate.Milliseconds() > 250 || fStep {
+			if elapsedExplodeUpdate.Milliseconds() > 156 || fStep {
 				startExplodeUpdate = time.Now()
 				for _, r := range rocks {
 					if r.iExplode > 0 {
@@ -678,7 +677,7 @@ func main() {
 
 		//fmt.Printf("nb bullets = %d\n", len(bullets))
 
-		sdl.Delay(15)
+		sdl.Delay(20)
 
 	}
 
