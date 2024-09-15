@@ -153,7 +153,7 @@ func (r *Rock) Draw(renderer *sdl.Renderer) {
 
 		for i, p1 := range r.points {
 			p2 := p1
-			uv := r.explVecs[i].UnitVector()
+			uv := vector.Normalize(r.explVecs[i])
 			uv.Mul(float64(r.iExplode))
 			p2.Add(uv)
 			renderer.DrawLine(int32(p1.X), int32(p1.Y), int32(p2.X), int32(p2.Y))
@@ -172,10 +172,10 @@ func (r *Rock) CollideRock(r1 *Rock) {
 		//mt.Print("Collision\n")
 
 		nV12 := v
-		tV12 := nV12.NormalVector()
+		tV12 := nV12.Normal()
 
-		unV12 := nV12.UnitVector()
-		utV12 := tV12.UnitVector()
+		unV12 := vector.Normalize(nV12)
+		utV12 := vector.Normalize(tV12)
 
 		nV1 := r.veloVec.Dot(unV12)
 		tV1 := r.veloVec.Dot(utV12)

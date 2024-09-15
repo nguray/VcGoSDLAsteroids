@@ -50,7 +50,7 @@ func (vec *Vector2f) Magnitude() float64 {
 	return math.Sqrt(vec.X*vec.X + vec.Y*vec.Y)
 }
 
-func (vec *Vector2f) UnitVector() Vector2f {
+func (vec *Vector2f) Normalize() Vector2f {
 	m := vec.Magnitude()
 	if m > 0.0 {
 		return Vector2f{vec.X / m, vec.Y / m}
@@ -59,6 +59,15 @@ func (vec *Vector2f) UnitVector() Vector2f {
 	}
 }
 
-func (vec *Vector2f) NormalVector() Vector2f {
+func Normalize(v Vector2f) Vector2f {
+	m := v.Magnitude()
+	if m > 0.0 {
+		return Vector2f{v.X / m, v.Y / m}
+	} else {
+		return Vector2f{0.0, 0.0}
+	}
+}
+
+func (vec *Vector2f) Normal() Vector2f {
 	return Vector2f{-vec.Y, vec.X}
 }

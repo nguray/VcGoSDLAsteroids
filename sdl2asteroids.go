@@ -73,7 +73,7 @@ func NewGame() {
 		r := NewRandomRock()
 		rocks = append(rocks, r)
 	}
-	ship.SetPosition(vector.Vector2f{WIN_WIDTH / 2, WIN_HEIGHT / 2})
+	ship.SetPosition(vector.Vector2f{X: WIN_WIDTH / 2, Y: WIN_HEIGHT / 2})
 
 }
 
@@ -107,10 +107,10 @@ func DoCollision(object0, object1 GameObject) {
 		//mt.Print("Collision\n")
 
 		nV12 := v
-		tV12 := nV12.NormalVector()
+		tV12 := nV12.Normal()
 
-		unV12 := nV12.UnitVector()
-		utV12 := tV12.UnitVector()
+		unV12 := vector.Normalize(nV12)
+		utV12 := vector.Normalize(tV12)
 
 		nV1 := veloVec0.Dot(unV12)
 		tV1 := veloVec0.Dot(utV12)
@@ -253,7 +253,7 @@ func main() {
 	defer renderer.Destroy()
 
 	a := -90.0
-	ship = ShipNew(vector.Vector2f{WIN_WIDTH / 2, WIN_HEIGHT / 2}, a)
+	ship = ShipNew(vector.Vector2f{X: WIN_WIDTH / 2, Y: WIN_HEIGHT / 2}, a)
 
 	shipTex0, _ := renderer.CreateTextureFromSurface(shipImg0)
 	defer shipTex0.Destroy()
@@ -468,14 +468,14 @@ func main() {
 							rock.fDelete = true
 							//-- SubDivide
 							m := rock.mass / 3
-							uv := rock.veloVec.UnitVector()
-							un := uv.NormalVector()
+							uv := vector.Normalize(rock.veloVec)
+							un := uv.Normal()
 							normeV := rock.veloVec.Magnitude() * 1.5
 
 							v10 := vector.Add(uv, un)
 							v10.Mul(10)
 							p10 := vector.Add(rock.pos, v10)
-							uv10 := v10.UnitVector()
+							uv10 := vector.Normalize(v10)
 							uv10.Mul(normeV)
 							rocks = append(rocks, NewRock(p10, uv10, m))
 
@@ -483,7 +483,7 @@ func main() {
 							v20.Mul(10)
 							p20 := rock.pos
 							p20.Add(v20)
-							uv20 := v20.UnitVector()
+							uv20 := vector.Normalize(v20)
 							uv20.Mul(normeV)
 							rocks = append(rocks, NewRock(p20, uv20, m))
 
@@ -491,7 +491,7 @@ func main() {
 							v30.Mul(10)
 							p30 := rock.pos
 							p30.Add(v30)
-							uv30 := v30.UnitVector()
+							uv30 := vector.Normalize(v30)
 							uv30.Mul(normeV)
 							rocks = append(rocks, NewRock(p30, uv30, m))
 
@@ -500,7 +500,7 @@ func main() {
 							v40.Mul(10)
 							p40 := rock.pos
 							p40.Add(v40)
-							uv40 := v40.UnitVector()
+							uv40 := vector.Normalize(v40)
 							uv40.Mul(normeV)
 							rocks = append(rocks, NewRock(p40, uv40, m))
 
@@ -510,14 +510,14 @@ func main() {
 
 							//-- SubDivide
 							m := rock.mass / 2
-							uv := rock.veloVec.UnitVector()
-							un := uv.NormalVector()
+							uv := vector.Normalize(rock.veloVec)
+							un := uv.Normal()
 							normeV := rock.veloVec.Magnitude()
 
 							v10 := vector.Add(uv, un)
 							v10.Mul(10)
 							p10 := vector.Add(rock.pos, v10)
-							uv10 := v10.UnitVector()
+							uv10 := vector.Normalize(v10)
 							uv10.Mul(normeV)
 							rocks = append(rocks, NewRock(p10, uv10, m))
 
@@ -525,14 +525,14 @@ func main() {
 							v20.Sub(un)
 							v20.Mul(10)
 							p20 := vector.Add(rock.pos, v20)
-							uv20 := v20.UnitVector()
+							uv20 := vector.Normalize(v20)
 							uv20.Mul(normeV)
 							rocks = append(rocks, NewRock(p20, uv20, m))
 
 							v30 := vector.Sub(un, uv)
 							v30.Mul(10)
 							p30 := vector.Add(rock.pos, v30)
-							uv30 := v30.UnitVector()
+							uv30 := vector.Normalize(v30)
 							uv30.Mul(normeV)
 							rocks = append(rocks, NewRock(p30, uv30, m))
 
@@ -540,7 +540,7 @@ func main() {
 							v40.Mul(-1)
 							v40.Mul(10)
 							p40 := vector.Add(rock.pos, v40)
-							uv40 := v40.UnitVector()
+							uv40 := vector.Normalize(v40)
 							uv40.Mul(normeV)
 							rocks = append(rocks, NewRock(p40, uv40, m))
 
