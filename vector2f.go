@@ -7,9 +7,17 @@ type Vector2f struct {
 	y float64
 }
 
+func AddVector(vl, vr Vector2f) Vector2f {
+	return Vector2f{vl.x + vr.x, vl.y + vr.y}
+}
+
 func (vec *Vector2f) AddVector(v Vector2f) {
 	vec.x += v.x
 	vec.y += v.y
+}
+
+func SubVector(vl, vr Vector2f) Vector2f {
+	return Vector2f{vl.x - vr.x, vl.y - vr.y}
 }
 
 func (vec *Vector2f) SubVector(v Vector2f) {

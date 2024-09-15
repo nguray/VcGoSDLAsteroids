@@ -26,7 +26,6 @@ func (bul *Bullet) UpdatePosition() {
 }
 
 func (bul *Bullet) HitRock(rock *Rock) bool {
-
 	v := bul.pos
 	v.SubVector(rock.pos)
 	d := v.Magnitude()
