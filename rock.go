@@ -63,8 +63,8 @@ func NewRandomRock() *Rock {
 
 	ra := float64(myRand.Intn(360)) * math.Pi / 180.0
 	rck := &Rock{
-		pos:     vector.Vector2f{float64(px), float64(py)},
-		veloVec: vector.Vector2f{1.35 * math.Cos(ra), 1.35 * math.Sin(ra)},
+		pos:     vector.Vector2f{X: float64(px), Y: float64(py)},
+		veloVec: vector.Vector2f{X: 1.35 * math.Cos(ra), Y: 1.35 * math.Sin(ra)},
 		mass:    m,
 		radius:  10.0 * m,
 		fDelete: false,
@@ -75,7 +75,7 @@ func NewRandomRock() *Rock {
 }
 
 func (r *Rock) UpdatePosition() {
-	r.pos.AddVector(r.veloVec)
+	r.pos.Add(r.veloVec)
 }
 
 func (r Rock) IsDelete() bool {
@@ -120,7 +120,7 @@ func (r *Rock) InitExplosion() {
 		d := float64(2)
 		v := vector.Mul(vector.Vector2f{X: cos[i], Y: sin[i]}, d)
 		r.explVecs = append(r.explVecs, v)
-		p1 := vector.AddVector(r.pos, v)
+		p1 := vector.Add(r.pos, v)
 		r.points = append(r.points, p1)
 	}
 }
@@ -128,8 +128,8 @@ func (r *Rock) InitExplosion() {
 func (r *Rock) UpdateExplosion() {
 	for i := range NB_COSSINS {
 		v := vector.Mul(r.veloVec, 3)
-		p := vector.AddVector(r.points[i], v)
-		p.AddVector(r.explVecs[i])
+		p := vector.Add(r.points[i], v)
+		p.Add(r.explVecs[i])
 		r.points[i] = p
 	}
 }
@@ -155,7 +155,7 @@ func (r *Rock) Draw(renderer *sdl.Renderer) {
 			p2 := p1
 			uv := r.explVecs[i].UnitVector()
 			uv.Mul(float64(r.iExplode))
-			p2.AddVector(uv)
+			p2.Add(uv)
 			renderer.DrawLine(int32(p1.X), int32(p1.Y), int32(p2.X), int32(p2.Y))
 		}
 
@@ -166,7 +166,7 @@ func (r *Rock) Draw(renderer *sdl.Renderer) {
 func (r *Rock) CollideRock(r1 *Rock) {
 	//---------------------------------------
 	v := r1.pos
-	v.SubVector(r.pos)
+	v.Sub(r.pos)
 	d := v.Magnitude()
 	if d <= (r.radius + r1.radius) {
 		//mt.Print("Collision\n")
@@ -191,14 +191,14 @@ func (r *Rock) CollideRock(r1 *Rock) {
 		v.Mul(nV1c)
 		r.veloVec = utV12
 		r.veloVec.Mul(tV1)
-		r.veloVec.AddVector(v)
+		r.veloVec.Add(v)
 
 		//--
 		v = unV12
 		v.Mul(nV2c)
 		r1.veloVec = utV12
 		r1.veloVec.Mul(tV2)
-		r1.veloVec.AddVector(v)
+		r1.veloVec.Add(v)
 
 	}
 

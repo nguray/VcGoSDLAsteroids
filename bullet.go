@@ -26,12 +26,12 @@ func (bul *Bullet) IsDelete() bool {
 }
 
 func (bul *Bullet) UpdatePosition() {
-	bul.pos.AddVector(bul.veloVect)
+	bul.pos.Add(bul.veloVect)
 }
 
 func (bul *Bullet) HitRock(rock *Rock) bool {
 	v := bul.pos
-	v.SubVector(rock.pos)
+	v.Sub(rock.pos)
 	d := v.Magnitude()
 	return d < (rock.radius + bul.radius)
 }

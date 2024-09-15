@@ -7,27 +7,22 @@ type Vector2f struct {
 	Y float64
 }
 
-func AddVector(vl, vr Vector2f) Vector2f {
+func Add(vl, vr Vector2f) Vector2f {
 	return Vector2f{vl.X + vr.X, vl.Y + vr.Y}
 }
 
-func (vec *Vector2f) AddVector(v Vector2f) {
+func (vec *Vector2f) Add(v Vector2f) {
 	vec.X += v.X
 	vec.Y += v.Y
 }
 
-func SubVector(vl, vr Vector2f) Vector2f {
+func Sub(vl, vr Vector2f) Vector2f {
 	return Vector2f{vl.X - vr.X, vl.Y - vr.Y}
 }
 
-func (vec *Vector2f) SubVector(v Vector2f) {
+func (vec *Vector2f) Sub(v Vector2f) {
 	vec.X -= v.X
 	vec.Y -= v.Y
-}
-
-func (vec *Vector2f) Add(v float64) {
-	vec.X += v
-	vec.Y += v
 }
 
 func (vec *Vector2f) Mul(v float64) {

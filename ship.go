@@ -86,7 +86,7 @@ func (sh *Ship) Draw(renderer *sdl.Renderer) {
 
 func (sh *Ship) UpdatePosition() {
 	//--
-	sh.pos.AddVector(sh.veloVec)
+	sh.pos.Add(sh.veloVec)
 	//fmt.Printf("(%.3f,%.3f)\n", sh.pos.x, sh.pos.y)
 
 }
@@ -94,7 +94,7 @@ func (sh *Ship) UpdatePosition() {
 func (sh *Ship) Accelerate(d float64) {
 	v := sh.thrushUnitVec
 	v.Mul(d)
-	sh.veloVec.AddVector(v)
+	sh.veloVec.Add(v)
 
 }
 
