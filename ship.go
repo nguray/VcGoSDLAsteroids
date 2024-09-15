@@ -2,27 +2,28 @@ package main
 
 import (
 	"math"
+	"sdl2_asteroids/vector"
 
 	"github.com/veandco/go-sdl2/sdl"
 )
 
 type Ship struct {
-	pos           Vector2f
+	pos           vector.Vector2f
 	a             float64
-	veloVec       Vector2f
+	veloVec       vector.Vector2f
 	mass          float64
 	radius        float64
-	thrushUnitVec Vector2f
+	thrushUnitVec vector.Vector2f
 	curTex        *sdl.Texture
 	idleTex       *sdl.Texture
 	accelTex      *sdl.Texture
 	decelTex      *sdl.Texture
 }
 
-func ShipNew(p Vector2f, a float64) *Ship {
+func ShipNew(p vector.Vector2f, a float64) *Ship {
 	//--
 	ra := ((a) * math.Pi) / 180.0
-	unitVec := Vector2f{math.Cos(ra), math.Sin(ra)}
+	unitVec := vector.Vector2f{X: math.Cos(ra), Y: math.Sin(ra)}
 	v := unitVec
 	v.Mul(0.1)
 
@@ -35,7 +36,7 @@ func ShipNew(p Vector2f, a float64) *Ship {
 func (sh *Ship) SetAngle(a float64) {
 	sh.a = a
 	ra := ((a) * math.Pi) / 180.0
-	sh.thrushUnitVec = Vector2f{math.Cos(ra), math.Sin(ra)}
+	sh.thrushUnitVec = vector.Vector2f{X: math.Cos(ra), Y: math.Sin(ra)}
 }
 
 func (sh *Ship) SetIdle() {
@@ -58,12 +59,12 @@ func (sh *Ship) Draw(renderer *sdl.Renderer) {
 
 	//--
 	renderer.SetDrawColor(60, 60, 0, 255)
-	DrawCircle(renderer, int32(sh.pos.x), int32(sh.pos.y), int32(sh.radius))
+	DrawCircle(renderer, int32(sh.pos.X), int32(sh.pos.Y), int32(sh.radius))
 
 	//--
 	src := sdl.Rect{X: 0, Y: 0, W: 32, H: 32}
-	x := int32(sh.pos.x) - 15
-	y := int32(sh.pos.y) - 15
+	x := int32(sh.pos.X) - 15
+	y := int32(sh.pos.Y) - 15
 	dst := sdl.Rect{X: x, Y: y, W: 32, H: 32}
 	renderer.CopyEx(sh.curTex, &src, &dst, sh.a+90.0, nil, sdl.FLIP_NONE)
 
@@ -97,24 +98,24 @@ func (sh *Ship) Accelerate(d float64) {
 
 }
 
-func (sh *Ship) DirectionVec() Vector2f {
+func (sh *Ship) DirectionVec() vector.Vector2f {
 	ra := ((sh.a) * math.Pi) / 180.0
-	return Vector2f{math.Cos(ra), math.Sin(ra)}
+	return vector.Vector2f{X: math.Cos(ra), Y: math.Sin(ra)}
 }
 
-func (sh *Ship) GetPosition() Vector2f {
+func (sh *Ship) GetPosition() vector.Vector2f {
 	return sh.pos
 }
 
-func (sh *Ship) SetPosition(p Vector2f) {
+func (sh *Ship) SetPosition(p vector.Vector2f) {
 	sh.pos = p
 }
 
-func (sh *Ship) GetVelocity() Vector2f {
+func (sh *Ship) GetVelocity() vector.Vector2f {
 	return sh.veloVec
 }
 
-func (sh *Ship) SetVelocity(v Vector2f) {
+func (sh *Ship) SetVelocity(v vector.Vector2f) {
 	sh.veloVec = v
 }
 

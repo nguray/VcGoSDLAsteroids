@@ -11,6 +11,7 @@ import (
 	"math/rand"
 	"os"
 	"path/filepath"
+	"sdl2_asteroids/vector"
 	"time"
 
 	"github.com/veandco/go-sdl2/img"
@@ -22,10 +23,10 @@ import (
 type GameMode int
 
 type GameObject interface {
-	SetPosition(p Vector2f)
-	GetPosition() Vector2f
-	GetVelocity() Vector2f
-	SetVelocity(v Vector2f)
+	SetPosition(p vector.Vector2f)
+	GetPosition() vector.Vector2f
+	GetVelocity() vector.Vector2f
+	SetVelocity(v vector.Vector2f)
 	GetMass() float64
 	GetRadius() float64
 }
@@ -68,11 +69,11 @@ func NewGame() {
 
 	bullets = bullets[:0]
 	//--
-	for _ = range 5 {
+	for range 5 {
 		r := NewRandomRock()
 		rocks = append(rocks, r)
 	}
-	ship.SetPosition(Vector2f{WIN_WIDTH / 2, WIN_HEIGHT / 2})
+	ship.SetPosition(vector.Vector2f{WIN_WIDTH / 2, WIN_HEIGHT / 2})
 
 }
 
@@ -81,8 +82,7 @@ func FireBullet() {
 	if fPause {
 		fPause = false
 	}
-	v := ship.DirectionVec()
-	v.Mul(5.0)
+	v := vector.Mul(ship.DirectionVec(), 5.0)
 	b := NewBullet(ship.pos, v)
 	bullets = append(bullets, b)
 	laser_snd.Play(-1, 0)
@@ -144,9 +144,9 @@ func DoCollision(object0, object1 GameObject) {
 type GenericBounce interface {
 	*Rock | *Ship
 	GetRadius() float64
-	GetPosition() Vector2f
-	GetVelocity() Vector2f
-	SetVelocity(v Vector2f)
+	GetPosition() vector.Vector2f
+	GetVelocity() vector.Vector2f
+	SetVelocity(v vector.Vector2f)
 }
 
 func DoSreenFrameCollison[T GenericBounce](obj T, s sdl.Rect) {
@@ -160,12 +160,12 @@ func DoSreenFrameCollison[T GenericBounce](obj T, s sdl.Rect) {
 	right := float64(s.X+s.W) - radius
 	bottom := float64(s.Y+s.H) - radius
 
-	if pos.x <= float64(left) || pos.x > float64(right) {
-		veloVec.x = -veloVec.x
+	if pos.X <= float64(left) || pos.X > float64(right) {
+		veloVec.X = -veloVec.X
 	}
 
-	if pos.y <= float64(top) || pos.y > float64(bottom) {
-		veloVec.y = -veloVec.y
+	if pos.Y <= float64(top) || pos.Y > float64(bottom) {
+		veloVec.Y = -veloVec.Y
 	}
 	obj.SetVelocity(veloVec)
 
@@ -253,7 +253,7 @@ func main() {
 	defer renderer.Destroy()
 
 	a := -90.0
-	ship = ShipNew(Vector2f{WIN_WIDTH / 2, WIN_HEIGHT / 2}, a)
+	ship = ShipNew(vector.Vector2f{WIN_WIDTH / 2, WIN_HEIGHT / 2}, a)
 
 	shipTex0, _ := renderer.CreateTextureFromSurface(shipImg0)
 	defer shipTex0.Destroy()
@@ -472,14 +472,14 @@ func main() {
 							un := uv.NormalVector()
 							normeV := rock.veloVec.Magnitude() * 1.5
 
-							v10 := AddVector(uv, un)
+							v10 := vector.AddVector(uv, un)
 							v10.Mul(10)
-							p10 := AddVector(rock.pos, v10)
+							p10 := vector.AddVector(rock.pos, v10)
 							uv10 := v10.UnitVector()
 							uv10.Mul(normeV)
 							rocks = append(rocks, NewRock(p10, uv10, m))
 
-							v20 := SubVector(uv, un)
+							v20 := vector.SubVector(uv, un)
 							v20.Mul(10)
 							p20 := rock.pos
 							p20.AddVector(v20)
@@ -487,7 +487,7 @@ func main() {
 							uv20.Mul(normeV)
 							rocks = append(rocks, NewRock(p20, uv20, m))
 
-							v30 := SubVector(un, uv)
+							v30 := vector.SubVector(un, uv)
 							v30.Mul(10)
 							p30 := rock.pos
 							p30.AddVector(v30)
@@ -495,7 +495,7 @@ func main() {
 							uv30.Mul(normeV)
 							rocks = append(rocks, NewRock(p30, uv30, m))
 
-							v40 := AddVector(uv, un)
+							v40 := vector.AddVector(uv, un)
 							v40.Mul(-1)
 							v40.Mul(10)
 							p40 := rock.pos
@@ -514,9 +514,9 @@ func main() {
 							un := uv.NormalVector()
 							normeV := rock.veloVec.Magnitude()
 
-							v10 := AddVector(uv, un)
+							v10 := vector.AddVector(uv, un)
 							v10.Mul(10)
-							p10 := AddVector(rock.pos, v10)
+							p10 := vector.AddVector(rock.pos, v10)
 							uv10 := v10.UnitVector()
 							uv10.Mul(normeV)
 							rocks = append(rocks, NewRock(p10, uv10, m))
@@ -524,22 +524,22 @@ func main() {
 							v20 := uv
 							v20.SubVector(un)
 							v20.Mul(10)
-							p20 := AddVector(rock.pos, v20)
+							p20 := vector.AddVector(rock.pos, v20)
 							uv20 := v20.UnitVector()
 							uv20.Mul(normeV)
 							rocks = append(rocks, NewRock(p20, uv20, m))
 
-							v30 := SubVector(un, uv)
+							v30 := vector.SubVector(un, uv)
 							v30.Mul(10)
-							p30 := AddVector(rock.pos, v30)
+							p30 := vector.AddVector(rock.pos, v30)
 							uv30 := v30.UnitVector()
 							uv30.Mul(normeV)
 							rocks = append(rocks, NewRock(p30, uv30, m))
 
-							v40 := AddVector(uv, un)
+							v40 := vector.AddVector(uv, un)
 							v40.Mul(-1)
 							v40.Mul(10)
-							p40 := AddVector(rock.pos, v40)
+							p40 := vector.AddVector(rock.pos, v40)
 							uv40 := v40.UnitVector()
 							uv40.Mul(normeV)
 							rocks = append(rocks, NewRock(p40, uv40, m))
@@ -557,7 +557,7 @@ func main() {
 
 				if !fHit {
 					//-- Check for out range
-					if (b.pos.x < 0) || (b.pos.x > WIN_WIDTH) || (b.pos.y < 0) || (b.pos.y > WIN_HEIGHT) {
+					if (b.pos.X < 0) || (b.pos.X > WIN_WIDTH) || (b.pos.Y < 0) || (b.pos.Y > WIN_HEIGHT) {
 						fHit = true
 					}
 

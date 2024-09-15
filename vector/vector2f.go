@@ -1,64 +1,68 @@
-package main
+package vector
 
 import "math"
 
 type Vector2f struct {
-	x float64
-	y float64
+	X float64
+	Y float64
 }
 
 func AddVector(vl, vr Vector2f) Vector2f {
-	return Vector2f{vl.x + vr.x, vl.y + vr.y}
+	return Vector2f{vl.X + vr.X, vl.Y + vr.Y}
 }
 
 func (vec *Vector2f) AddVector(v Vector2f) {
-	vec.x += v.x
-	vec.y += v.y
+	vec.X += v.X
+	vec.Y += v.Y
 }
 
 func SubVector(vl, vr Vector2f) Vector2f {
-	return Vector2f{vl.x - vr.x, vl.y - vr.y}
+	return Vector2f{vl.X - vr.X, vl.Y - vr.Y}
 }
 
 func (vec *Vector2f) SubVector(v Vector2f) {
-	vec.x -= v.x
-	vec.y -= v.y
+	vec.X -= v.X
+	vec.Y -= v.Y
 }
 
 func (vec *Vector2f) Add(v float64) {
-	vec.x += v
-	vec.y += v
+	vec.X += v
+	vec.Y += v
 }
 
 func (vec *Vector2f) Mul(v float64) {
-	vec.x *= v
-	vec.y *= v
+	vec.X *= v
+	vec.Y *= v
+}
+
+func Mul(v Vector2f, fval float64) Vector2f {
+	return Vector2f{v.X * fval, v.Y * fval}
 }
 
 func (vec *Vector2f) Div(v float64) {
 	if v != 0.0 {
-		vec.x /= v
-		vec.y /= v
+		vec.X /= v
+		vec.Y /= v
 	}
 }
 
 func (vec *Vector2f) Dot(v Vector2f) float64 {
-	return vec.x*v.x + vec.y*v.y
+	return vec.X*v.X + vec.Y*v.Y
 }
 
 func (vec *Vector2f) Magnitude() float64 {
-	return math.Sqrt(vec.x*vec.x + vec.y*vec.y)
+	return math.Sqrt(vec.X*vec.X + vec.Y*vec.Y)
 }
 
 func (vec *Vector2f) UnitVector() Vector2f {
 	m := vec.Magnitude()
 	if m > 0.0 {
-		return Vector2f{vec.x / m, vec.y / m}
+		return Vector2f{vec.X / m, vec.Y / m}
 	} else {
 		return Vector2f{0.0, 0.0}
 	}
 }
 
 func (vec *Vector2f) NormalVector() Vector2f {
-	return Vector2f{-vec.y, vec.x}
+	return Vector2f{-vec.Y, vec.X}
 }

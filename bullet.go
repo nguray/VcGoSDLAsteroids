@@ -1,15 +1,19 @@
 package main
 
-import "github.com/veandco/go-sdl2/sdl"
+import (
+	"sdl2_asteroids/vector"
+
+	"github.com/veandco/go-sdl2/sdl"
+)
 
 type Bullet struct {
-	pos      Vector2f
-	veloVect Vector2f
+	pos      vector.Vector2f
+	veloVect vector.Vector2f
 	radius   float64
 	fDelete  bool
 }
 
-func NewBullet(p Vector2f, vel Vector2f) *Bullet {
+func NewBullet(p vector.Vector2f, vel vector.Vector2f) *Bullet {
 	return &Bullet{pos: p, veloVect: vel, radius: 1}
 }
 
@@ -37,12 +41,12 @@ func (bul *Bullet) Draw(renderer *sdl.Renderer) {
 	tv := uv.NormalVector()
 	uv.Mul(5)
 	tv.Mul(2)
-	x1 := bul.pos.x
-	y1 := bul.pos.y
-	x2 := x1 - uv.x + tv.x
-	y2 := y1 - uv.y + tv.y
-	x3 := x1 - uv.x - tv.x
-	y3 := y1 - uv.y - tv.y
+	x1 := bul.pos.X
+	y1 := bul.pos.Y
+	x2 := x1 - uv.X + tv.X
+	y2 := y1 - uv.Y + tv.Y
+	x3 := x1 - uv.X - tv.X
+	y3 := y1 - uv.Y - tv.Y
 	points := []sdl.FPoint{
 		{X: float32(x1), Y: float32(y1)},
 		{X: float32(x2), Y: float32(y2)},

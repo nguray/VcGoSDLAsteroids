@@ -2,6 +2,7 @@ package main
 
 import (
 	"math"
+	"sdl2_asteroids/vector"
 
 	"github.com/veandco/go-sdl2/sdl"
 )
@@ -25,17 +26,17 @@ func PreCalculateCosSin() {
 }
 
 type Rock struct {
-	pos      Vector2f
-	veloVec  Vector2f
+	pos      vector.Vector2f
+	veloVec  vector.Vector2f
 	mass     float64
 	radius   float64
 	fDelete  bool
 	iExplode int
-	explVecs []Vector2f
-	points   []Vector2f
+	explVecs []vector.Vector2f
+	points   []vector.Vector2f
 }
 
-func NewRock(p Vector2f, v Vector2f, m float64) *Rock {
+func NewRock(p vector.Vector2f, v vector.Vector2f, m float64) *Rock {
 	rck := &Rock{pos: p, veloVec: v, mass: m}
 	rck.radius = 10.0 * m
 	rck.fDelete = false
@@ -62,8 +63,8 @@ func NewRandomRock() *Rock {
 
 	ra := float64(myRand.Intn(360)) * math.Pi / 180.0
 	rck := &Rock{
-		pos:     Vector2f{float64(px), float64(py)},
-		veloVec: Vector2f{1.35 * math.Cos(ra), 1.35 * math.Sin(ra)},
+		pos:     vector.Vector2f{float64(px), float64(py)},
+		veloVec: vector.Vector2f{1.35 * math.Cos(ra), 1.35 * math.Sin(ra)},
 		mass:    m,
 		radius:  10.0 * m,
 		fDelete: false,
@@ -117,19 +118,17 @@ func (r *Rock) InitExplosion() {
 
 	for i := range NB_COSSINS {
 		d := float64(2)
-		v := Vector2f{cos[i], sin[i]}
-		v.Mul(d)
+		v := vector.Mul(vector.Vector2f{X: cos[i], Y: sin[i]}, d)
 		r.explVecs = append(r.explVecs, v)
-		p1 := AddVector(r.pos, v)
+		p1 := vector.AddVector(r.pos, v)
 		r.points = append(r.points, p1)
 	}
 }
 
 func (r *Rock) UpdateExplosion() {
 	for i := range NB_COSSINS {
-		v := r.veloVec
-		v.Mul(3)
-		p := AddVector(r.points[i], v)
+		v := vector.Mul(r.veloVec, 3)
+		p := vector.AddVector(r.points[i], v)
 		p.AddVector(r.explVecs[i])
 		r.points[i] = p
 	}
@@ -140,13 +139,12 @@ func (r *Rock) Draw(renderer *sdl.Renderer) {
 	if r.iExplode == 0 {
 
 		renderer.SetDrawColor(255, 255, 0, 255)
-		DrawCircle(renderer, int32(r.pos.x), int32(r.pos.y), int32(r.radius))
-		x1 := r.pos.x
-		y1 := r.pos.y
-		v := r.veloVec
-		v.Mul(10)
-		x2 := x1 + v.x
-		y2 := y1 + v.y
+		DrawCircle(renderer, int32(r.pos.X), int32(r.pos.Y), int32(r.radius))
+		x1 := r.pos.X
+		y1 := r.pos.Y
+		v := vector.Mul(r.veloVec, 10)
+		x2 := x1 + v.X
+		y2 := y1 + v.Y
 		renderer.DrawLine(int32(x1), int32(y1), int32(x2), int32(y2))
 
 	} else {
@@ -158,7 +156,7 @@ func (r *Rock) Draw(renderer *sdl.Renderer) {
 			uv := r.explVecs[i].UnitVector()
 			uv.Mul(float64(r.iExplode))
 			p2.AddVector(uv)
-			renderer.DrawLine(int32(p1.x), int32(p1.y), int32(p2.x), int32(p2.y))
+			renderer.DrawLine(int32(p1.X), int32(p1.Y), int32(p2.X), int32(p2.Y))
 		}
 
 	}
@@ -206,19 +204,19 @@ func (r *Rock) CollideRock(r1 *Rock) {
 
 }
 
-func (r *Rock) GetPosition() Vector2f {
+func (r *Rock) GetPosition() vector.Vector2f {
 	return r.pos
 }
 
-func (r *Rock) SetPosition(p Vector2f) {
+func (r *Rock) SetPosition(p vector.Vector2f) {
 	r.pos = p
 }
 
-func (r *Rock) GetVelocity() Vector2f {
+func (r *Rock) GetVelocity() vector.Vector2f {
 	return r.veloVec
 }
 
-func (r *Rock) SetVelocity(v Vector2f) {
+func (r *Rock) SetVelocity(v vector.Vector2f) {
 	r.veloVec = v
 }
 
