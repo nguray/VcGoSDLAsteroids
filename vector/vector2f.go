@@ -47,6 +47,7 @@ func (vec *Vector2f) Div(v float64) {
 }
 
 func (vec *Vector2f) Dot(v Vector2f) float64 {
+	// Produit Scalaire
 	return vec.X*v.X + vec.Y*v.Y
 }
 
