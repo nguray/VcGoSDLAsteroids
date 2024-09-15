@@ -25,17 +25,17 @@ func (vec *Vector2f) SubVector(v Vector2f) {
 	vec.y -= v.y
 }
 
-func (vec *Vector2f) AddScalar(v float64) {
+func (vec *Vector2f) Add(v float64) {
 	vec.x += v
 	vec.y += v
 }
 
-func (vec *Vector2f) MulScalar(v float64) {
+func (vec *Vector2f) Mul(v float64) {
 	vec.x *= v
 	vec.y *= v
 }
 
-func (vec *Vector2f) DivScalar(v float64) {
+func (vec *Vector2f) Div(v float64) {
 	if v != 0.0 {
 		vec.x /= v
 		vec.y /= v

@@ -82,7 +82,7 @@ func FireBullet() {
 		fPause = false
 	}
 	v := ship.DirectionVec()
-	v.MulScalar(5.0)
+	v.Mul(5.0)
 	b := NewBullet(ship.pos, v)
 	bullets = append(bullets, b)
 	laser_snd.Play(-1, 0)
@@ -123,17 +123,17 @@ func DoCollision(object0, object1 GameObject) {
 
 		//--
 		v0 := unV12
-		v0.MulScalar(nV1c)
+		v0.Mul(nV1c)
 		newVeloVec0 := utV12
-		newVeloVec0.MulScalar(tV1)
+		newVeloVec0.Mul(tV1)
 		newVeloVec0.AddVector(v0)
 		object0.SetVelocity(newVeloVec0)
 
 		//--
 		v1 := unV12
-		v1.MulScalar(nV2c)
+		v1.Mul(nV2c)
 		newVeloVec1 := utV12
-		newVeloVec1.MulScalar(tV2)
+		newVeloVec1.Mul(tV2)
 		newVeloVec1.AddVector(v1)
 		object1.SetVelocity(newVeloVec1)
 
@@ -278,7 +278,7 @@ func main() {
 
 	screenFrame := sdl.Rect{X: 0, Y: 0, W: WIN_WIDTH, H: WIN_HEIGHT}
 
-	// Precalculate Cosinuw and Sinus Values
+	// Precalculate Cosinus and Sinus Values for rock Explosion animation
 	PreCalculateCosSin()
 
 	iRotate := 0
@@ -473,35 +473,35 @@ func main() {
 							normeV := rock.veloVec.Magnitude() * 1.5
 
 							v10 := AddVector(uv, un)
-							v10.MulScalar(10)
+							v10.Mul(10)
 							p10 := AddVector(rock.pos, v10)
 							uv10 := v10.UnitVector()
-							uv10.MulScalar(normeV)
+							uv10.Mul(normeV)
 							rocks = append(rocks, NewRock(p10, uv10, m))
 
 							v20 := SubVector(uv, un)
-							v20.MulScalar(10)
+							v20.Mul(10)
 							p20 := rock.pos
 							p20.AddVector(v20)
 							uv20 := v20.UnitVector()
-							uv20.MulScalar(normeV)
+							uv20.Mul(normeV)
 							rocks = append(rocks, NewRock(p20, uv20, m))
 
 							v30 := SubVector(un, uv)
-							v30.MulScalar(10)
+							v30.Mul(10)
 							p30 := rock.pos
 							p30.AddVector(v30)
 							uv30 := v30.UnitVector()
-							uv30.MulScalar(normeV)
+							uv30.Mul(normeV)
 							rocks = append(rocks, NewRock(p30, uv30, m))
 
 							v40 := AddVector(uv, un)
-							v40.MulScalar(-1)
-							v40.MulScalar(10)
+							v40.Mul(-1)
+							v40.Mul(10)
 							p40 := rock.pos
 							p40.AddVector(v40)
 							uv40 := v40.UnitVector()
-							uv40.MulScalar(normeV)
+							uv40.Mul(normeV)
 							rocks = append(rocks, NewRock(p40, uv40, m))
 
 							//fPause = true
@@ -515,33 +515,33 @@ func main() {
 							normeV := rock.veloVec.Magnitude()
 
 							v10 := AddVector(uv, un)
-							v10.MulScalar(10)
+							v10.Mul(10)
 							p10 := AddVector(rock.pos, v10)
 							uv10 := v10.UnitVector()
-							uv10.MulScalar(normeV)
+							uv10.Mul(normeV)
 							rocks = append(rocks, NewRock(p10, uv10, m))
 
 							v20 := uv
 							v20.SubVector(un)
-							v20.MulScalar(10)
+							v20.Mul(10)
 							p20 := AddVector(rock.pos, v20)
 							uv20 := v20.UnitVector()
-							uv20.MulScalar(normeV)
+							uv20.Mul(normeV)
 							rocks = append(rocks, NewRock(p20, uv20, m))
 
 							v30 := SubVector(un, uv)
-							v30.MulScalar(10)
+							v30.Mul(10)
 							p30 := AddVector(rock.pos, v30)
 							uv30 := v30.UnitVector()
-							uv30.MulScalar(normeV)
+							uv30.Mul(normeV)
 							rocks = append(rocks, NewRock(p30, uv30, m))
 
 							v40 := AddVector(uv, un)
-							v40.MulScalar(-1)
-							v40.MulScalar(10)
+							v40.Mul(-1)
+							v40.Mul(10)
 							p40 := AddVector(rock.pos, v40)
 							uv40 := v40.UnitVector()
-							uv40.MulScalar(normeV)
+							uv40.Mul(normeV)
 							rocks = append(rocks, NewRock(p40, uv40, m))
 
 							//fPause = true
@@ -601,7 +601,7 @@ func main() {
 				}
 			}
 
-			if elapsedExplodeUpdate.Milliseconds() > 156 || fStep {
+			if elapsedExplodeUpdate.Milliseconds() > 120 || fStep {
 				startExplodeUpdate = time.Now()
 				for _, r := range rocks {
 					if r.iExplode > 0 {

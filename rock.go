@@ -16,8 +16,9 @@ var (
 )
 
 func PreCalculateCosSin() {
+	aOffset := 360 / NB_COSSINS
 	for i := range NB_COSSINS {
-		ra := float64(i*60) * math.Pi / 180
+		ra := float64(i*aOffset) * math.Pi / 180
 		cos = append(cos, math.Cos(ra))
 		sin = append(sin, math.Sin(ra))
 	}
@@ -117,23 +118,18 @@ func (r *Rock) InitExplosion() {
 	for i := range NB_COSSINS {
 		d := float64(2)
 		v := Vector2f{cos[i], sin[i]}
-		v.MulScalar(d)
-		//v1 := r.veloVec
-		//v1.MulScalar(3)
-		//v.AddVector(v1)
+		v.Mul(d)
 		r.explVecs = append(r.explVecs, v)
-		p1 := r.pos
-		p1.AddVector(v)
+		p1 := AddVector(r.pos, v)
 		r.points = append(r.points, p1)
 	}
 }
 
 func (r *Rock) UpdateExplosion() {
 	for i := range NB_COSSINS {
-		p := r.points[i]
 		v := r.veloVec
-		v.MulScalar(3)
-		p.AddVector(v)
+		v.Mul(3)
+		p := AddVector(r.points[i], v)
 		p.AddVector(r.explVecs[i])
 		r.points[i] = p
 	}
@@ -148,7 +144,7 @@ func (r *Rock) Draw(renderer *sdl.Renderer) {
 		x1 := r.pos.x
 		y1 := r.pos.y
 		v := r.veloVec
-		v.MulScalar(10)
+		v.Mul(10)
 		x2 := x1 + v.x
 		y2 := y1 + v.y
 		renderer.DrawLine(int32(x1), int32(y1), int32(x2), int32(y2))
@@ -160,7 +156,7 @@ func (r *Rock) Draw(renderer *sdl.Renderer) {
 		for i, p1 := range r.points {
 			p2 := p1
 			uv := r.explVecs[i].UnitVector()
-			uv.MulScalar(2)
+			uv.Mul(float64(r.iExplode))
 			p2.AddVector(uv)
 			renderer.DrawLine(int32(p1.x), int32(p1.y), int32(p2.x), int32(p2.y))
 		}
@@ -194,16 +190,16 @@ func (r *Rock) CollideRock(r1 *Rock) {
 
 		//--
 		v = unV12
-		v.MulScalar(nV1c)
+		v.Mul(nV1c)
 		r.veloVec = utV12
-		r.veloVec.MulScalar(tV1)
+		r.veloVec.Mul(tV1)
 		r.veloVec.AddVector(v)
 
 		//--
 		v = unV12
-		v.MulScalar(nV2c)
+		v.Mul(nV2c)
 		r1.veloVec = utV12
-		r1.veloVec.MulScalar(tV2)
+		r1.veloVec.Mul(tV2)
 		r1.veloVec.AddVector(v)
 
 	}

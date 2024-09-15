@@ -35,8 +35,8 @@ func (bul *Bullet) HitRock(rock *Rock) bool {
 func (bul *Bullet) Draw(renderer *sdl.Renderer) {
 	uv := bul.veloVect.UnitVector()
 	tv := uv.NormalVector()
-	uv.MulScalar(5)
-	tv.MulScalar(2)
+	uv.Mul(5)
+	tv.Mul(2)
 	x1 := bul.pos.x
 	y1 := bul.pos.y
 	x2 := x1 - uv.x + tv.x
