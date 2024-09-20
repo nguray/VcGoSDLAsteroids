@@ -171,6 +171,46 @@ func DoSreenFrameCollison[T GenericBounce](obj T, s sdl.Rect) {
 
 }
 
+func SubDivideRock(r Rock, m float64) {
+
+	uv := vector.Normalize(r.veloVec)
+	un := uv.Normal()
+	normeV := r.veloVec.Magnitude() * 1.5
+
+	v10 := vector.Add(uv, un)
+	v10.Mul(10)
+	p10 := vector.Add(r.pos, v10)
+	uv10 := vector.Normalize(v10)
+	uv10.Mul(normeV)
+	rocks = append(rocks, NewRock(p10, uv10, m))
+
+	v20 := vector.Sub(uv, un)
+	v20.Mul(10)
+	p20 := r.pos
+	p20.Add(v20)
+	uv20 := vector.Normalize(v20)
+	uv20.Mul(normeV)
+	rocks = append(rocks, NewRock(p20, uv20, m)rock.mass / 2)
+
+	v30 := vector.Sub(un, uv)
+	v30.Mul(10)
+	p30 := r.pos
+	p30.Add(v30)
+	uv30 := vector.Normalize(v30)
+	uv30.Mul(normeV)
+	rocks = append(rocks, NewRock(p30, uv30, m))
+
+	v40 := vector.Add(uv, un)
+	v40.Mul(-1)
+	v40.Mul(10)
+	p40 := r.posrock.mass / 2
+	p40.Add(v40)
+	uv40 := vector.Normalize(v40)
+	uv40.Mul(normeV)
+	rocks = append(rocks, NewRock(p40, uv40, m))
+
+}
+
 func main() {
 
 	var renderer *sdl.Renderer
@@ -249,7 +289,7 @@ func main() {
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Failed to create renderer: %s\n", err)
 		panic(err)
-	}
+	}rock.mass / 2
 	defer renderer.Destroy()
 
 	a := -90.0
@@ -321,6 +361,7 @@ func main() {
 						iAccel = -1
 					}
 				case 3:
+
 					if t.Value < 500 && t.Value > -500 {
 						iRotate = 0
 					} else if t.Value < 500 {
@@ -332,7 +373,7 @@ func main() {
 				}
 
 			case *sdl.JoyBallEvent:
-				fmt.Println("Joystick", t.Which, "trackball moved by", t.XRel, t.YRel)
+				fmt.Println("Joystick", t.Whichrock.mass / 2, "trackball moved by", t.XRel, t.YRel)
 			case *sdl.JoyButtonEvent:
 				if t.State == sdl.PRESSED {
 					fmt.Println("Joystick", t.Which, "button", t.Button, "pressed")
@@ -342,7 +383,7 @@ func main() {
 				} else {
 					fmt.Println("Joystick", t.Which, "button", t.Button, "released")
 				}
-
+				rock.mass / 2
 			case *sdl.JoyHatEvent:
 				position := ""
 				switch t.Value {
@@ -352,7 +393,7 @@ func main() {
 					position = "top"
 				case sdl.HAT_RIGHTUP:
 					position = "top-right"
-				case sdl.HAT_RIGHT:
+				case sdl.HAT_RIGHT:rock.mass / 2
 					position = "right"
 				case sdl.HAT_RIGHTDOWN:
 					position = "bottom-right"
@@ -407,7 +448,7 @@ func main() {
 						iRotate = 0
 					case sdl.K_UP:
 						iAccel = 0
-					case sdl.K_DOWN:
+					case sdl.K_DOWN:rock.mass / 2
 						iAccel = 0
 					case sdl.K_s:
 						if fPause {
@@ -460,6 +501,7 @@ func main() {
 
 				//--
 				for _, rock := range rocks {
+
 					if rock.iExplode == 0 && b.HitRock(rock) {
 						fHit = true
 						explosion_snd.Play(-1, 0)
@@ -467,82 +509,12 @@ func main() {
 						if rock.mass == 2 {
 							rock.fDelete = true
 							//-- SubDivide
-							m := rock.mass / 3
-							uv := vector.Normalize(rock.veloVec)
-							un := uv.Normal()
-							normeV := rock.veloVec.Magnitude() * 1.5
-
-							v10 := vector.Add(uv, un)
-							v10.Mul(10)
-							p10 := vector.Add(rock.pos, v10)
-							uv10 := vector.Normalize(v10)
-							uv10.Mul(normeV)
-							rocks = append(rocks, NewRock(p10, uv10, m))
-
-							v20 := vector.Sub(uv, un)
-							v20.Mul(10)
-							p20 := rock.pos
-							p20.Add(v20)
-							uv20 := vector.Normalize(v20)
-							uv20.Mul(normeV)
-							rocks = append(rocks, NewRock(p20, uv20, m))
-
-							v30 := vector.Sub(un, uv)
-							v30.Mul(10)
-							p30 := rock.pos
-							p30.Add(v30)
-							uv30 := vector.Normalize(v30)
-							uv30.Mul(normeV)
-							rocks = append(rocks, NewRock(p30, uv30, m))
-
-							v40 := vector.Add(uv, un)
-							v40.Mul(-1)
-							v40.Mul(10)
-							p40 := rock.pos
-							p40.Add(v40)
-							uv40 := vector.Normalize(v40)
-							uv40.Mul(normeV)
-							rocks = append(rocks, NewRock(p40, uv40, m))
-
+							SubDivideRock(*rock, rock.mass/3)
 							//fPause = true
 						} else if rock.mass == 1 {
 							rock.fDelete = true
-
 							//-- SubDivide
-							m := rock.mass / 2
-							uv := vector.Normalize(rock.veloVec)
-							un := uv.Normal()
-							normeV := rock.veloVec.Magnitude()
-
-							v10 := vector.Add(uv, un)
-							v10.Mul(10)
-							p10 := vector.Add(rock.pos, v10)
-							uv10 := vector.Normalize(v10)
-							uv10.Mul(normeV)
-							rocks = append(rocks, NewRock(p10, uv10, m))
-
-							v20 := uv
-							v20.Sub(un)
-							v20.Mul(10)
-							p20 := vector.Add(rock.pos, v20)
-							uv20 := vector.Normalize(v20)
-							uv20.Mul(normeV)
-							rocks = append(rocks, NewRock(p20, uv20, m))
-
-							v30 := vector.Sub(un, uv)
-							v30.Mul(10)
-							p30 := vector.Add(rock.pos, v30)
-							uv30 := vector.Normalize(v30)
-							uv30.Mul(normeV)
-							rocks = append(rocks, NewRock(p30, uv30, m))
-
-							v40 := vector.Add(uv, un)
-							v40.Mul(-1)
-							v40.Mul(10)
-							p40 := vector.Add(rock.pos, v40)
-							uv40 := vector.Normalize(v40)
-							uv40.Mul(normeV)
-							rocks = append(rocks, NewRock(p40, uv40, m))
+							SubDivideRock(*rock, rock.mass/2)
 
 							//fPause = true
 						} else {
@@ -556,11 +528,11 @@ func main() {
 				}
 
 				if !fHit {
-					//-- Check for out range
+					//-- Check for out of window frame
 					if (b.pos.X < 0) || (b.pos.X > WIN_WIDTH) || (b.pos.Y < 0) || (b.pos.Y > WIN_HEIGHT) {
+						//--
 						fHit = true
 					}
-
 				}
 
 				if !fHit {

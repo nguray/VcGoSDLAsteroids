@@ -1,3 +1,6 @@
+//
+//
+
 package vector
 
 import "math"
@@ -7,8 +10,8 @@ type Vector2f struct {
 	Y float64
 }
 
-func Add(vl, vr Vector2f) Vector2f {
-	return Vector2f{vl.X + vr.X, vl.Y + vr.Y}
+func Add(lhs, rhs Vector2f) Vector2f {
+	return Vector2f{lhs.X + rhs.X, lhs.Y + rhs.Y}
 }
 
 func (vec *Vector2f) Add(v Vector2f) {
@@ -16,8 +19,8 @@ func (vec *Vector2f) Add(v Vector2f) {
 	vec.Y += v.Y
 }
 
-func Sub(vl, vr Vector2f) Vector2f {
-	return Vector2f{vl.X - vr.X, vl.Y - vr.Y}
+func Sub(lhs, rhs Vector2f) Vector2f {
+	return Vector2f{lhs.X - rhs.X, lhs.Y - rhs.Y}
 }
 
 func (vec *Vector2f) Sub(v Vector2f) {
