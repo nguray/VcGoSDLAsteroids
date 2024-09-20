@@ -190,7 +190,7 @@ func SubDivideRock(r Rock, m float64) {
 	p20.Add(v20)
 	uv20 := vector.Normalize(v20)
 	uv20.Mul(normeV)
-	rocks = append(rocks, NewRock(p20, uv20, m)rock.mass / 2)
+	rocks = append(rocks, NewRock(p20, uv20, m))
 
 	v30 := vector.Sub(un, uv)
 	v30.Mul(10)
@@ -203,7 +203,7 @@ func SubDivideRock(r Rock, m float64) {
 	v40 := vector.Add(uv, un)
 	v40.Mul(-1)
 	v40.Mul(10)
-	p40 := r.posrock.mass / 2
+	p40 := r.pos
 	p40.Add(v40)
 	uv40 := vector.Normalize(v40)
 	uv40.Mul(normeV)
@@ -221,7 +221,7 @@ func main() {
 	defer sdl.Quit()
 
 	nbJoysticks := sdl.NumJoysticks()
-	//fmt.Printf("nb joysticks = %d\n", nbJoysticks)
+	//fmt.Printf("nb joysticks = %d\n", nbJoysticks)ock.mass / 2)
 
 	if nbJoysticks != 0 {
 		sdl.JoystickEventState(sdl.ENABLE)
@@ -262,7 +262,7 @@ func main() {
 
 	// v1 := Vector2f{1.5 * math.Cos(20.0), 1.5 * math.Sin(20.0)}
 	// fmt.Printf("v1(%3.2f,%3.2f)\n", v1.x, v1.y)
-	// uv1 := v1.UnitVector()
+	// uv1 := v1.UnitVector()ock.mass / 2)
 	// fmt.Printf("uv1(%3.2f,%3.2f)\n", uv1.x, uv1.y)
 	// nv1 := uv1.NormalVector()
 	// fmt.Printf("nv1(%3.2f,%3.2f)\n", nv1.x, nv1.y)
@@ -289,7 +289,7 @@ func main() {
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Failed to create renderer: %s\n", err)
 		panic(err)
-	}rock.mass / 2
+	}
 	defer renderer.Destroy()
 
 	a := -90.0
@@ -373,7 +373,7 @@ func main() {
 				}
 
 			case *sdl.JoyBallEvent:
-				fmt.Println("Joystick", t.Whichrock.mass / 2, "trackball moved by", t.XRel, t.YRel)
+				fmt.Println("Joystick", t.Which, "trackball moved by", t.XRel, t.YRel)
 			case *sdl.JoyButtonEvent:
 				if t.State == sdl.PRESSED {
 					fmt.Println("Joystick", t.Which, "button", t.Button, "pressed")
@@ -383,7 +383,6 @@ func main() {
 				} else {
 					fmt.Println("Joystick", t.Which, "button", t.Button, "released")
 				}
-				rock.mass / 2
 			case *sdl.JoyHatEvent:
 				position := ""
 				switch t.Value {
@@ -393,7 +392,7 @@ func main() {
 					position = "top"
 				case sdl.HAT_RIGHTUP:
 					position = "top-right"
-				case sdl.HAT_RIGHT:rock.mass / 2
+				case sdl.HAT_RIGHT:
 					position = "right"
 				case sdl.HAT_RIGHTDOWN:
 					position = "bottom-right"
@@ -448,7 +447,7 @@ func main() {
 						iRotate = 0
 					case sdl.K_UP:
 						iAccel = 0
-					case sdl.K_DOWN:rock.mass / 2
+					case sdl.K_DOWN:
 						iAccel = 0
 					case sdl.K_s:
 						if fPause {
