@@ -498,39 +498,39 @@ func main() {
 				b.UpdatePosition()
 				fHit := false
 
-				//--
-				for _, rock := range rocks {
+				//-- Check for out of window frame
+				if (b.pos.X < 0) || (b.pos.X > WIN_WIDTH) || (b.pos.Y < 0) || (b.pos.Y > WIN_HEIGHT) {
+					//--
+					continue
 
-					if rock.iExplode == 0 && b.HitRock(rock) {
-						fHit = true
-						explosion_snd.Play(-1, 0)
+				} else {
 
-						if rock.mass == 2 {
-							rock.fDelete = true
-							//-- SubDivide
-							SubDivideRock(*rock, rock.mass/3)
-							//fPause = true
-						} else if rock.mass == 1 {
-							rock.fDelete = true
-							//-- SubDivide
-							SubDivideRock(*rock, rock.mass/2)
+					//--
+					for _, rock := range rocks {
 
-							//fPause = true
-						} else {
-							rock.iExplode = 1
-							rock.InitExplosion()
-							//fPause = true
+						if rock.iExplode == 0 && b.HitRock(rock) {
+							fHit = true
+							explosion_snd.Play(-1, 0)
 
+							if rock.mass == 2 {
+								rock.fDelete = true
+								//-- SubDivide
+								SubDivideRock(*rock, rock.mass/3)
+								//fPause = true
+							} else if rock.mass == 1 {
+								rock.fDelete = true
+								//-- SubDivide
+								SubDivideRock(*rock, rock.mass/2)
+
+								//fPause = true
+							} else {
+								rock.iExplode = 1
+								rock.InitExplosion()
+								//fPause = true
+
+							}
+							break
 						}
-						break
-					}
-				}
-
-				if !fHit {
-					//-- Check for out of window frame
-					if (b.pos.X < 0) || (b.pos.X > WIN_WIDTH) || (b.pos.Y < 0) || (b.pos.Y > WIN_HEIGHT) {
-						//--
-						fHit = true
 					}
 				}
 
