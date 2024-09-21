@@ -18,6 +18,7 @@ type Ship struct {
 	idleTex       *sdl.Texture
 	accelTex      *sdl.Texture
 	decelTex      *sdl.Texture
+	shieldLevel   float64
 }
 
 func ShipNew(p vector.Vector2f, a float64) *Ship {
@@ -29,8 +30,23 @@ func ShipNew(p vector.Vector2f, a float64) *Ship {
 
 	sh := &Ship{pos: p, a: a, veloVec: v, thrushUnitVec: unitVec}
 	sh.mass = 2
-	sh.radius = 7.0 * sh.mass
+	sh.shieldLevel = 3
+	sh.radius = (8.0 + sh.shieldLevel*1.5) * sh.mass
 	return sh
+}
+
+func (sh *Ship) DecShieldLevel() {
+	if sh.shieldLevel > 0 {
+		sh.shieldLevel--
+		sh.radius = (8.0 + sh.shieldLevel*1.5) * sh.mass
+	}
+}
+
+func (sh *Ship) IncShieldLevel() {
+	if sh.shieldLevel < 3 {
+		sh.shieldLevel++
+		sh.radius = (8.0 + sh.shieldLevel*1.5) * sh.mass
+	}
 }
 
 func (sh *Ship) SetAngle(a float64) {
@@ -58,7 +74,9 @@ func (sh *Ship) OffsetAngle(da float64) {
 func (sh *Ship) Draw(renderer *sdl.Renderer) {
 
 	//--
-	renderer.SetDrawColor(60, 60, 0, 255)
+
+	red := (255 - uint8(sh.shieldLevel)*64)
+	renderer.SetDrawColor(red, 60, 0, 255)
 	DrawCircle(renderer, int32(sh.pos.X), int32(sh.pos.Y), int32(sh.radius))
 
 	//--

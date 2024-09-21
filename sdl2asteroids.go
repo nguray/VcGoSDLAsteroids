@@ -89,7 +89,7 @@ func FireBullet() {
 
 }
 
-func DoCollision(object0, object1 GameObject) {
+func DoCollision(object0, object1 GameObject) bool {
 	//---------------------------------------
 	p0 := object0.GetPosition()
 	p1 := object1.GetPosition()
@@ -136,9 +136,9 @@ func DoCollision(object0, object1 GameObject) {
 		newVeloVec1.Mul(tV2)
 		newVeloVec1.Add(v1)
 		object1.SetVelocity(newVeloVec1)
-
+		return true
 	}
-
+	return false
 }
 
 type GenericBounce interface {
@@ -313,7 +313,7 @@ func main() {
 
 	//--drawObjects
 	startExplodeUpdate := time.Now()
-	//startV := startH
+	startUpdateShield := time.Now()
 	//startR := startH
 
 	screenFrame := sdl.Rect{X: 0, Y: 0, W: WIN_WIDTH, H: WIN_HEIGHT}
@@ -339,6 +339,7 @@ func main() {
 		// renderer.FillRect(&rect)20
 
 		elapsedExplodeUpdate := time.Since(startExplodeUpdate)
+		elapsedUpdateShield := time.Since(startUpdateShield)
 
 		//-- Process current mode Events
 		for event := sdl.PollEvent(); event != nil; event = sdl.PollEvent() {
@@ -554,7 +555,10 @@ func main() {
 			// Do collison Ship<->Rock
 			for _, r := range rocks {
 				if !r.fDelete && r.iExplode == 0 {
-					DoCollision(ship, r)
+					if DoCollision(ship, r) {
+						ship.DecShieldLevel()
+						startUpdateShield = time.Now()
+					}
 				}
 			}
 
@@ -572,6 +576,7 @@ func main() {
 				}
 			}
 
+			//--
 			if elapsedExplodeUpdate.Milliseconds() > 120 || fStep {
 				startExplodeUpdate = time.Now()
 				for _, r := range rocks {
@@ -583,6 +588,12 @@ func main() {
 						}
 					}
 				}
+			}
+
+			//--
+			if elapsedUpdateShield.Milliseconds() > 5000 {
+				startUpdateShield = time.Now()
+				ship.IncShieldLevel()
 			}
 
 		} else {
